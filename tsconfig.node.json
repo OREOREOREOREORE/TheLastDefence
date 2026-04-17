@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["vite.config.ts", ".prettierrc.mjs", "eslint.config.js"]
+}
