@@ -6,6 +6,13 @@ import {
 
 import { join } from 'node:path';
 
+const tsRuleOverrides = {
+  '@typescript-eslint/restrict-template-expressions': [
+    'error',
+    { allowNumber: true, allowBoolean: true },
+  ],
+};
+
 /**
  * @param {string} subPath sub path to generate configurations for
  */
@@ -13,6 +20,7 @@ function generateTSConfigurations(subPath) {
   return generateTSESLintConfigurations(
     [`src/${subPath}/**/*.ts`],
     join(import.meta.dirname, subPath),
+    tsRuleOverrides,
   );
 }
 
