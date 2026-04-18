@@ -1,9 +1,24 @@
+/**
+ * Timing metadata passed to ticker listeners.
+ */
 export interface Time {
+  /** Milliseconds elapsed since the previous processed tick. */
   delta: number;
+  /** High-resolution current timestamp from `requestAnimationFrame`. */
   current: number;
 }
+
+/**
+ * Callback invoked whenever the ticker processes a frame.
+ */
 export type TickerListener = (time: Time) => void;
 
+/**
+ * Frame ticker built on top of `requestAnimationFrame` with FPS throttling.
+ *
+ * Register listeners with {@link addListener}, then call {@link start} to begin
+ * dispatching updates.
+ */
 export class Ticker {
   private lastTickTime = 0;
   private fps: number;
@@ -13,6 +28,9 @@ export class Ticker {
 
   private started = false;
 
+  /**
+   * Creates a ticker with a target frame rate.
+   */
   constructor(fps = 60) {
     this.fps = fps;
   }
@@ -48,6 +66,9 @@ export class Ticker {
     });
   }
 
+  /**
+   * Subscribes a listener and returns its numeric id.
+   */
   public addListener(listener: TickerListener) {
     const id = this.listenerIdBase;
     this.listeners.set(id, listener);
@@ -56,10 +77,16 @@ export class Ticker {
     return id;
   }
 
+  /**
+   * Unsubscribes a listener by id.
+   */
   public removeListener(id: number) {
     this.listeners.delete(id);
   }
 
+  /**
+   * Starts dispatching ticker updates.
+   */
   public start() {
     this.started = true;
 
@@ -68,6 +95,12 @@ export class Ticker {
     });
   }
 
+  /**
+   * Stops dispatching ticker updates.
+   *
+   * The internal animation frame loop keeps running, but listeners are skipped
+   * until {@link start} sets the ticker back to active.
+   */
   public stop() {
     this.started = false;
   }

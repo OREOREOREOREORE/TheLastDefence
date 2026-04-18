@@ -1,33 +1,77 @@
 import { isIntervalsOverlap, projectPolygonToInterval } from './sat-math';
 
 interface SpriteSequence {
+  /** Row index in the sprite sheet (0-based). */
   row: number;
+  /** Number of frames in this sequence. */
   numberOfFrames: number;
+  /** Playback speed in frames per second. */
   fps: number;
+  /** Whether playback wraps to the first frame after the last frame. */
   loop: boolean;
 }
 
 interface SpriteOptions {
+  /** Source URL/path of the sprite sheet image. */
   src: string;
+  /** Width of one frame in the sprite sheet, in pixels. */
   spriteWidth: number;
+  /** Height of one frame in the sprite sheet, in pixels. */
   spriteHeight: number;
+  /** Named animation sequences available for this sprite. */
   sequences: Record<string, SpriteSequence>;
+  /** Draw scale multiplier. Defaults to `1`. */
   scale?: number;
+  /** Initial canvas center X coordinate. Defaults to `0`. */
   canvasX?: number;
+  /** Initial canvas center Y coordinate. Defaults to `0`. */
   canvasY?: number;
+  /** Initial rotation in radians. Defaults to `0`. */
   rotation?: number;
+  /** Enables debug rendering helpers. Defaults to `false`. */
   debug?: boolean;
 }
 
 interface BoundingBox {
+  /** Top-left corner. */
   topLeft: DOMPoint;
+  /** Top-right corner. */
   topRight: DOMPoint;
+  /** Bottom-left corner. */
   bottomLeft: DOMPoint;
+  /** Bottom-right corner. */
   bottomRight: DOMPoint;
+  /** Width in pixels. */
   width: number;
+  /** Height in pixels. */
   height: number;
 }
 
+/**
+ * A drawable and collidable sprite backed by a sprite sheet image.
+ *
+ * `Sprite` extends `Image`, supports named animation sequences, rotation,
+ * hit-testing, and SAT-based collision checks against other sprites.
+ *
+ * Emits a custom `'spriteClick'` event when {@link notifyClick} is called with
+ * a point that falls inside the rotated sprite bounds. Event detail is a
+ * `DOMPoint` in canvas coordinates.
+ *
+ * @example
+ * const player = new Sprite({
+ *   src: playerSpriteSheet,
+ *   spriteWidth: 24,
+ *   spriteHeight: 25,
+ *   scale: 2,
+ *   sequences: {
+ *     moveLeft: { row: 4, fps: 10, numberOfFrames: 10, loop: true },
+ *   },
+ * });
+ *
+ * player.setSequence('moveLeft');
+ * player.canvasX = 100;
+ * player.canvasY = 100;
+ */
 export class Sprite extends Image {
   private spriteWidth: number;
   private spriteHeight: number;
@@ -49,6 +93,9 @@ export class Sprite extends Image {
   // In radians
   public rotation: number;
 
+  /**
+   * Creates a sprite instance.
+   */
   constructor({
     src,
     spriteWidth,
@@ -84,6 +131,12 @@ export class Sprite extends Image {
     );
   }
 
+  /**
+   * Draws the current frame and advances animation timing.
+   *
+   * No rendering is performed until the image has loaded and a sequence has
+   * been selected via {@link setSequence}.
+   */
   public tick(time: number, context: CanvasRenderingContext2D) {
     if (!this.complete || !this.currentSequence) {
       return;
@@ -164,6 +217,11 @@ export class Sprite extends Image {
     );
   }
 
+  /**
+   * Selects the active animation sequence by name and resets to frame `0`.
+   *
+   * @throws {Error} If the sequence name does not exist.
+   */
   public setSequence(name: string) {
     const sequence = this.sequences.get(name);
     if (!sequence) {
@@ -174,6 +232,9 @@ export class Sprite extends Image {
     this.currentFrame = 0;
   }
 
+  /**
+   * Returns the axis-aligned bounds of the sprite before rotation.
+   */
   public getBoundingBox(): BoundingBox {
     return {
       topLeft: new DOMPoint(
@@ -197,6 +258,9 @@ export class Sprite extends Image {
     };
   }
 
+  /**
+   * Returns sprite bounds with corner points transformed by current rotation.
+   */
   public getRotatedBoundingBox(): BoundingBox {
     const boundingBox = this.getBoundingBox();
 
@@ -213,6 +277,9 @@ export class Sprite extends Image {
     };
   }
 
+  /**
+   * Tests collision with another sprite using SAT on rotated rectangles.
+   */
   public collidesWith(other: Sprite) {
     const thisSpriteBoundingBox = this.getRotatedBoundingBox();
     const otherSpriteBoundingBox = other.getRotatedBoundingBox();
@@ -269,6 +336,9 @@ export class Sprite extends Image {
     return true;
   }
 
+  /**
+   * Checks whether a canvas-space point is inside this sprite's rotated bounds.
+   */
   public pointInBoundingBox(point: DOMPoint) {
     const boundingBox = this.getBoundingBox();
     const rotatedPoint = point.matrixTransform(
@@ -283,6 +353,9 @@ export class Sprite extends Image {
     );
   }
 
+  /**
+   * Emits `'spriteClick'` when the supplied point intersects this sprite.
+   */
   public notifyClick(point: DOMPoint) {
     if (!this.pointInBoundingBox(point)) {
       return;
@@ -292,6 +365,9 @@ export class Sprite extends Image {
     this.dispatchEvent(clickEvent);
   }
 
+  /**
+   * Enables or disables debug bounding box and center point rendering.
+   */
   public setDebug(debug: boolean) {
     this.debug = debug;
   }
