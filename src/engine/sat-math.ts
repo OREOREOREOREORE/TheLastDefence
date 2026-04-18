@@ -2,9 +2,10 @@ interface ProjectionInterval {
   min: number;
   max: number;
 }
-
 /**
  * Projects a polygon onto the specified axis then project it onto a 1D interval
+ * 
+ * Reference: https://www.sevenson.com.au/programming/sat/
  *
  * Warning: This function expects the user projects the polygon onto the same axis,
  * one should not compare the intervals returned by this function if they are not projected onto the same axis
