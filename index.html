@@ -4,9 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Last Defense</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+    </div>
+    <div id="background"></div>
+    <!-- <script type="module" src="/src/frontend/start.ts"></script> -->
     <script type="module" src="/src/frontend/index.ts"></script>
+
+    <div class="container_form">
+
+      <form class="login_form">
+        <h1>Login</h1>
+        <input type="text" id="username" name="username" placeholder="username"><br>
+        <input type="password" id="pwd" name="password" placeholder="password"><br>
+        <div class="rmb-forget">
+          <label for=""><input type="checkbox">remember me!</label>
+        </div>
+        <button type="submit" id="login_btn">玩得啦！</button>
+        <div class="register">
+          <p>don't have an account?<a href="#">register</a></p>
+        </div>
+      </form>
+
+      <form class="register_form" style="display: none;">
+        <h1>Registration</h1>
+        <input type="text" id="reg_username" name="username" placeholder="username"><br>
+        <input type="password" id="reg_pwd" name="password" placeholder="password"><br>
+        <input type="password" id="ver_pwd" name="verify password" placeholder="verify password"><br>
+        <label for=""><input type="checkbox">I agree to the terms & conditions</label><br>
+        <button type="submit" id="reg_btn">Register</button>
+        <p>Already have an account?<a href="#" class="have_acc">Login</a></p>
+      </form>
+
+    </div>
   </body>
 </html>
