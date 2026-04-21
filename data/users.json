@@ -2,7 +2,13 @@
   "123": {
     "password": "$argon2id$v=19$m=65536,t=3,p=4$y0ECNjW71eZDv4kO2PKJ3w$hTv8BAlAJvLeYWbvPuxNnV23pyNwyViXUIVejA57LTk"
   },
+  "1234": {
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$mCBR2oJwOqrTq7iuvoYy9w$NcB4jXuqLcbdZyO9jMKshHvfV6YpPiSgohKCj806/rM"
+  },
   "Alan": {
     "password": "$argon2id$v=19$m=65536,t=3,p=4$V6rN9m09+m6b9/u4v0Visw$Wbv6+7I92DpeeTpfZ41uaIPE7+BC/gXdrISmaYR+7T8"
+  },
+  "Alann": {
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$NlDtpn6ij4rhJGJiQGToeQ$k2KD3EcomE/xpG/UvNn4AeROM+OmSkEzqYjPa2Ogss8"
   }
 }

@@ -1,13 +1,27 @@
 import { io } from 'socket.io-client';
 import { Application } from '../engine/application';
 import { Sprite } from '../engine/sprite';
-import $ from 'jquery';
+import { setupLogin, Authentication } from './login';
+
 
 import playerSpriteSheet from '../../asset/player_sprite.png';
 import backgroundImage from '../../asset/background.png';
 
 document.addEventListener('DOMContentLoaded', () => {
   io();
+  setupLogin();
+
+  Authentication.validate(
+    ()=>{
+      $(".container_form").hide();
+      const user = Authentication.getUser();
+      app.initialize();
+    },
+
+    () => {
+      $("container_form").show();
+    }
+  )
 
   const app = new Application({
     rootElementSelector: '#app',
@@ -24,75 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
        background: `url(${backgroundImage}) no-repeat center`,
    })
 
-    $("#login_btn").on("click", (e) => {
-      e.preventDefault();
 
-      const username = String($("#reg_username").val() ?? "").trim();
-      const password = String($("#reg_pwd").val() ?? "").trim();;
-
-      const json = JSON.stringify({username, password});
-
-      fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body:json
-      })
-      .then((res) => res.json())
-      .then((json)=>{
-        if (json.error){alert(json.error); return;}
-      })
-
-
-      $(".login_form").hide();
-    })
-
-    $(".register a").on("click", (e) => {
-      e.preventDefault();
-      $(".login_form").hide();
-      $(".register_form").show();
-    })
-
-    $("#reg_btn").on("click", (e) => {
-      e.preventDefault();
-      const username = String($("#reg_username").val() ?? "").trim();
-      const password = String($("#reg_pwd").val() ?? "").trim();
-      const ver_pwd = String($("#ver_pwd").val() ?? "").trim();
-
-      if (password != ver_pwd) {
-         alert("入返嗰啱嘅唔該");
-         return;
-      }
-
-      const json = JSON.stringify({username, password});
-
-      fetch("/register", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: json
-      })
-        .then((res) => res.json())
-        .then((json) => {
-        if (json.error){alert(json.error);return;};
-
-        // $(".register_form").get(0).reset
-        // alert("搞點開得");
-
-      }).catch((err)=> {alert(err); return;})
-
-
-      $(".register_form").hide();
-      $(".login_form").show();
-    })
-
-    $(".register_form a").on("click", (e) => {
-      e.preventDefault();
-
-
-
-
-      $(".register_form").hide();
-      $(".login_form").show();
-    })
 
   const player = new Sprite({
     src: playerSpriteSheet,

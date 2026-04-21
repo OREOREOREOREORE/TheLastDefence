@@ -11,8 +11,6 @@ import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
 import process from 'node:process';
-import { error } from 'node:console';
-import { setDefaultCACertificates } from 'node:tls';
 
 const app = express();
 const httpServer = createServer(app);
@@ -54,26 +52,31 @@ app.post('/login', async (req, res)=>{
 
   const verified = await argon2.verify(user.password, password);
   if (verified){
-    const token = jwt.sign({name: username}, secretKey, {expiresIn: '1h'});
+    const token = jwt.sign({name: username}, secretKey, {expiresIn: '30m'});
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: false, //true
-      maxAge: 36000
+      maxAge: 108000
     })
-    return res.json({success: true});
+    return res.json({success: true, user: {username}} );
   }
   res.json({error: "error"});
   // console.log(typeof users);
 })
 
-app.get('/auth', (req, res)=>{
+app.get('/validate', (req, res)=>{
   const token = req.cookies.auth_token;
-  if(!token) {res.send("no suck cookie"); return;};
-  const verified = jwt.verify(token, secretKey);
-  if (verified) res.json({sucess: true});
+  if(!token) {res.send("not logged in"); return;};
+
+  try {
+    const verified = jwt.verify(token, secretKey) as {name: string};
+    res.json({success: true, user: {username: verified.name}});
+  } catch {
+    res.json({error: "Invalid or expired token"});
+  }
 })
 
-app.get('/logout', (_, res)=>{
+app.get('/signout', (_, res)=>{
   res.clearCookie('auth_token');
   console.log('cookie cleaned')
 })
