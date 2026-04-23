@@ -12,6 +12,7 @@ export const Authentication = (function () {
 
     const signin = (username: string, password: string, onSuccess: ()=>void, onError: (err:string) => void)=>{
         const json = JSON.stringify({username, password});
+        console.log(json);
 
         fetch("/login", {
             method: "POST",
@@ -37,10 +38,10 @@ export const Authentication = (function () {
         })
         .then((res) => res.json())
         .then((json)=>{
-           if (json.error && onError){onError(json.error); return;}
+           if (json.error){onError(json.error); return;}
            if (json.success) onSuccess();
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.log(err))
     }
 
     const signout = (onSuccess: ()=>void, onError: (err:string)=>void) => {
@@ -49,24 +50,24 @@ export const Authentication = (function () {
         })
         .then((res) => res.json())
         .then((json)=>{
-            if (json.error) {onError(json.error); return;}
+            if (json.error) {alert(json.error); return;}
             user = null;
             onSuccess();
         })
-        .catch((err) => console.error(err))
+        .catch((err) => console.log(err))
     }
 
     const validate = (onSuccess: ()=>void, onError: (err:string)=>void) => {
-        fetch('validate',{
+        fetch('/validate',{
             method: "GET",
         })
         .then((res) => res.json())
         .then((json)=>{
-            if (json.error && onError){onError(json.error); return;}
+            if (json.error){onError(json.error); return;}
             user = json.user;
             onSuccess();
         })
-        .catch((err)=>console.error(err))
+        .catch((err)=>console.log(err))
     }
 
     return{getUser, signin, signup, signout, validate}
@@ -82,11 +83,19 @@ export function setupLogin() {
       const username = String($("#username").val() ?? "").trim();
       const password = String($("#pwd").val() ?? "").trim();
 
+      if (!username || !password){$(".message").text("password/username cannot be empty!"); return;}
+
       Authentication.signin(
         username, password,
-        () => { $(".login_form").hide(); },
-        (err) => { console.error(err); }
+        () => { (
+            $(".login_form").get(0) as HTMLFormElement).reset();
+            $(".login_form").hide();
+            $(".message").text("play得!");
+        },
+
+        (err) => { $(".message").text(err);}
       );
+
     })
 
 
@@ -98,17 +107,18 @@ export function setupLogin() {
       const ver_pwd = String($("#ver_pwd").val() ?? "").trim();
 
       if (password != ver_pwd) {
-         alert("入返嗰啱嘅唔該");
+         $(".message").text("入返嗰啱嘅唔該");
          return;
       }
 
       Authentication.signup(
         username, password,
         () => {
+          ($(".register_form").get(0) as HTMLFormElement).reset();
           $(".register_form").hide();
           $(".login_form").show();
         },
-        (err) => { console.error(err); }
+         (err) => { $(".message").text(err);}
       );
     })
 

@@ -46,7 +46,7 @@ app.post('/login', async (req, res)=>{
   const {username, password} = req.body;
   const users = JSON.parse(String(fs.readFileSync("data/users.json")))
 
-  if (!(username in users)) {res.json({error: "error"});return;}
+  if (!(username in users)) {res.json({error: "username not registered"});return;}
 
   const user = users[username];
 
@@ -56,17 +56,17 @@ app.post('/login', async (req, res)=>{
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: false, //true
-      maxAge: 108000
+      maxAge: 30 * 60 * 10000
     })
     return res.json({success: true, user: {username}} );
   }
-  res.json({error: "error"});
+  res.json({error: "incorrect password or username"});
   // console.log(typeof users);
 })
 
 app.get('/validate', (req, res)=>{
   const token = req.cookies.auth_token;
-  if(!token) {res.send("not logged in"); return;};
+  if(!token) {res.json({error:"cookie expired!"}); return;};
 
   try {
     const verified = jwt.verify(token, secretKey) as {name: string};
@@ -78,7 +78,7 @@ app.get('/validate', (req, res)=>{
 
 app.get('/signout', (_, res)=>{
   res.clearCookie('auth_token');
-  console.log('cookie cleaned')
+  res.json({success: true});
 })
 
 app.post('/register', async (req, res) => {

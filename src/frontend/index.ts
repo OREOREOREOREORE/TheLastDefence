@@ -11,18 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   io();
   setupLogin();
 
-  Authentication.validate(
-    ()=>{
-      $(".container_form").hide();
-      const user = Authentication.getUser();
-      app.initialize();
-    },
 
-    () => {
-      $("container_form").show();
-    }
-  )
-
+  console.log("HI");
   const app = new Application({
     rootElementSelector: '#app',
     width: 800,
@@ -38,7 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
        background: `url(${backgroundImage}) no-repeat center`,
    })
 
+  Authentication.validate(
+    ()=>{
+      $(".container_form").hide();
+      console.log("Welcome back",Authentication.getUser()?.username);
+    },
 
+    () => {
+      $("container_form").show();
+      console.log("validate failed");
+    }
+  )
 
   const player = new Sprite({
     src: playerSpriteSheet,

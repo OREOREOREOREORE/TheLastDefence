@@ -10,5 +10,8 @@
   },
   "Alann": {
     "password": "$argon2id$v=19$m=65536,t=3,p=4$NlDtpn6ij4rhJGJiQGToeQ$k2KD3EcomE/xpG/UvNn4AeROM+OmSkEzqYjPa2Ogss8"
+  },
+  "alan": {
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$Mj2QqK6cHcyHtEpBeWxJnA$1yeME0HvXHP83OQxRsejJHQZkOSIWM4nv+5yD7RHG0o"
   }
 }

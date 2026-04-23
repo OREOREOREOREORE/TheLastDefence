@@ -87,3 +87,13 @@ body{
     color: white;
     padding: 20px 45px 20px 20px;
 }
+
+/* error|success message */
+
+.message{
+    position: fixed;
+    color: crimson;
+    font-weight: bolder;
+    margin-top: 50rem;
+    font-size: 1.5rem;
+}
