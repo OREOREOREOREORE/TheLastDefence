@@ -4,6 +4,12 @@ interface User{
     username: string;
 }
 
+interface Res{
+    user: User;
+    error: string;
+    success:string;
+}
+
 //Authentication
 export const Authentication = (function () {
     let user: User | null = null;
@@ -19,13 +25,13 @@ export const Authentication = (function () {
             headers: {"Content-Type": "application/json"},
             body:json
         })
-        .then((res) => res.json())
+        .then((res) => res.json() as Promise<Res>)
         .then((json)=>{
             if (json.error) {onError(json.error); return;}
             user = json.user;
             onSuccess();
         })
-        .catch((err) => console.error(err));
+        .catch((err:unknown) => {console.error(err)});
     }
 
     const signup = (username: string, password: string, onSuccess: ()=>void, onError: (err:string) => void)=>{
@@ -36,38 +42,38 @@ export const Authentication = (function () {
             headers: {"Content-Type": "application/json"},
             body:json
         })
-        .then((res) => res.json())
+        .then((res) => res.json() as Promise<Res>)
         .then((json)=>{
            if (json.error){onError(json.error); return;}
            if (json.success) onSuccess();
         })
-        .catch((err) => console.log(err))
+        .catch((err:unknown) => {console.error(err)});
     }
 
     const signout = (onSuccess: ()=>void, onError: (err:string)=>void) => {
         fetch('/signout', {
             method: "GET",
         })
-        .then((res) => res.json())
+        .then((res) => res.json() as Promise<Res>)
         .then((json)=>{
-            if (json.error) {alert(json.error); return;}
+            if (json.error) {onError(json.error); return;}
             user = null;
             onSuccess();
         })
-        .catch((err) => console.log(err))
+        .catch((err:unknown) => {console.error(err)});
     }
 
     const validate = (onSuccess: ()=>void, onError: (err:string)=>void) => {
         fetch('/validate',{
             method: "GET",
         })
-        .then((res) => res.json())
+        .then((res) => res.json() as Promise<Res>)
         .then((json)=>{
             if (json.error){onError(json.error); return;}
             user = json.user;
             onSuccess();
         })
-        .catch((err)=>console.log(err))
+        .catch((err:unknown)=>{console.error(err)});
     }
 
     return{getUser, signin, signup, signout, validate}

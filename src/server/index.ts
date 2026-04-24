@@ -1,6 +1,6 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
-import fs from 'fs';
+import fs from 'node:fs';
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
 import cookieParser from 'cookie-parser'
@@ -37,26 +37,33 @@ websocketServer.on('connection', (socket) => {
 });
 
 /*Login System*/
+interface Req{
+  username: string;
+  password: string;
+}
+
+
 function containWordCharsOnly(text: string) {
     return /^\w+$/.test(text);
 }
 
 
 app.post('/login', async (req, res)=>{
-  const {username, password} = req.body;
-  const users = JSON.parse(String(fs.readFileSync("data/users.json")))
+  const {username, password} = req.body as Req;
+  const users = JSON.parse(String(fs.readFileSync("data/users.json"))) as Record<string, {password: string}>;
 
   if (!(username in users)) {res.json({error: "username not registered"});return;}
 
   const user = users[username];
 
   const verified = await argon2.verify(user.password, password);
+
   if (verified){
-    const token = jwt.sign({name: username}, secretKey, {expiresIn: '30m'});
+    const token = jwt.sign({name: username}, secretKey, {expiresIn: '5m'});
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: false, //true
-      maxAge: 30 * 60 * 10000
+      maxAge: 300000
     })
     return res.json({success: true, user: {username}} );
   }

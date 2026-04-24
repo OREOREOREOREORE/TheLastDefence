@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import $ from 'jquery';
 import { Application } from '../engine/application';
 import { Sprite } from '../engine/sprite';
 import { setupLogin, Authentication } from './login';
@@ -11,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
   io();
   setupLogin();
 
-
-  console.log("HI");
   const app = new Application({
     rootElementSelector: '#app',
     width: 800,
