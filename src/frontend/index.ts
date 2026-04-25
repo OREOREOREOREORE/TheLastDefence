@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     () => {
-      $("container_form").show();
+      $(".container_form").show();
       console.log("validate failed");
     }
   )
