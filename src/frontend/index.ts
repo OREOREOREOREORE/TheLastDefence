@@ -1,19 +1,43 @@
 import { io } from 'socket.io-client';
+import $ from 'jquery';
 import { Application } from '../engine/application';
 import { Sprite } from '../engine/sprite';
+import { setupLogin, Authentication } from './login';
+
 
 import playerSpriteSheet from '../../asset/player_sprite.png';
+import backgroundImage from '../../asset/background.png';
 
 document.addEventListener('DOMContentLoaded', () => {
   io();
+  setupLogin();
 
   const app = new Application({
     rootElementSelector: '#app',
     width: 800,
     height: 600,
     background: '#f0f0f0',
-    fps: 30,
+    fps: 120,
   });
+
+   const background = new Application({
+       rootElementSelector: '#background',
+       width: 1600, // 1200, 800
+       height: 1100,
+       background: `url(${backgroundImage}) no-repeat center`,
+   })
+
+  Authentication.validate(
+    ()=>{
+      $(".container_form").hide();
+      console.log("Welcome back",Authentication.getUser()?.username);
+    },
+
+    () => {
+      $(".container_form").show();
+      console.log("validate failed");
+    }
+  )
 
   const player = new Sprite({
     src: playerSpriteSheet,
@@ -62,5 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(player.collidesWith(player2));
   });
 
-  app.initialize();
+  // app.initialize();
+  background.initialize();
 });
