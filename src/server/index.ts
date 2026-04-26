@@ -9,9 +9,16 @@ import argon2 from 'argon2';
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
+// Change later
+const ROOM_ID = 'abc';
+
+import { addNewGameState, decrementX, decrementY, incrementX, incrementY } from './game-state.ts';
+
 import process from 'node:process';
 
 import type { Request } from 'express';
+
+import type { GameStateUpdateRequestMessage } from '../common/game-state.ts';
 
 interface Cookies {
   auth_token?: string;
@@ -52,8 +59,35 @@ ViteExpress.config({
 
 app.get('/message', (_, res) => res.send('Hello from express!'));
 
-websocketServer.on('connection', (socket) => {
+websocketServer.on('connection', async (socket) => {
   console.log('A client connected:', socket.id);
+
+  // TODO: Change later
+  await socket.join(ROOM_ID);
+  addNewGameState(ROOM_ID, {
+    playerA: { x: 100, y: 100, health: 100 },
+    playerB: { x: 100, y: 200, health: 100 },
+  });
+
+  socket.on('incrementX', (data: GameStateUpdateRequestMessage) => {
+    const newState = incrementX(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('incrementY', (data: GameStateUpdateRequestMessage) => {
+    const newState = incrementY(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('decrementX', (data: GameStateUpdateRequestMessage) => {
+    const newState = decrementX(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('decrementY', (data: GameStateUpdateRequestMessage) => {
+    const newState = decrementY(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
