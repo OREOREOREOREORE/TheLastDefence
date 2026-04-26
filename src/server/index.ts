@@ -187,3 +187,16 @@ await ViteExpress.bind(app, httpServer);
 httpServer.listen(8000, () => {
   console.log('Server is running on http://localhost:8000');
 });
+
+process.on('SIGINT', () => {
+  console.log('Shutting down server...');
+
+  websocketServer
+    .close()
+    .then(() => {
+      httpServer.close();
+    })
+    .catch((error: unknown) => {
+      console.error('Error closing server:', error);
+    });
+});
