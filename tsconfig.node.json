@@ -5,7 +5,8 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "allowJs": true,
-    "checkJs": true
+    "checkJs": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["vite.config.ts", ".prettierrc.mjs", "eslint.config.js"]
 }
