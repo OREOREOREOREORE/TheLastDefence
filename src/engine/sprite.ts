@@ -1,4 +1,5 @@
 import { isIntervalsOverlap, projectPolygonToInterval } from './sat-math';
+import type { BaseObject } from './base-object';
 
 interface SpriteSequence {
   /** Row index in the sprite sheet (0-based). */
@@ -72,7 +73,7 @@ interface BoundingBox {
  * player.canvasX = 100;
  * player.canvasY = 100;
  */
-export class Sprite extends Image {
+export class Sprite extends Image implements BaseObject {
   private spriteWidth: number;
   private spriteHeight: number;
 
