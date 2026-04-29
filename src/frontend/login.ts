@@ -165,6 +165,7 @@ export function setupLogin() {
         $('.start_menu').hide();
         $('.game_container').show();
         socket.emit('joinRoom');
+        console.log('join room');
         ScreenState.set('game_room');
 
     })
