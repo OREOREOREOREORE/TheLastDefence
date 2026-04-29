@@ -1,4 +1,7 @@
 {
+  "12": {
+    "password": "$argon2id$v=19$m=65536,t=3,p=4$RtNuk/AEfroCHd5q81TnfA$MCrkjFhjEK3f/HAh3vP3giY9GMThqAgshD3qJVW9Gdw"
+  },
   "123": {
     "password": "$argon2id$v=19$m=65536,t=3,p=4$y0ECNjW71eZDv4kO2PKJ3w$hTv8BAlAJvLeYWbvPuxNnV23pyNwyViXUIVejA57LTk"
   },

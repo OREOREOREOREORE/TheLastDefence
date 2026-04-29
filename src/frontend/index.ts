@@ -1,8 +1,7 @@
 import $ from 'jquery';
-import { setupLogin, Authentication } from './login';
+import { setupLogin, Authentication, ScreenState} from './login';
 import { Application } from '../engine/application';
-
-import backgroundImage from '../../asset/background.png';
+import { connectSocket } from './socket';
 
 $(() => {
   setupLogin();
@@ -22,16 +21,50 @@ $(() => {
   //   fps: 120,
   // });
 
-  const background = new Application({
-    rootElementSelector: '#background',
-    width: 1600, // 1200, 800
-    height: 1100,
-    background: `url(${backgroundImage}) no-repeat center`,
-  });
+  // const background = new Application({
+  //   rootElementSelector: '#background',
+  //   width: 1600, // 1200, 800
+  //   height: 1100,
+  //   background: `url(${backgroundImage}) no-repeat center`,
+  // });
+
+  // const gameRoom = new Application({
+  //   rootElementSelector: '#game-room',
+  //   width: 1600,
+  //   height: 1100,
+  //   background: `url(${gameRoomImage}) no-repeat center`,
+  // });
 
   Authentication.validate(
     () => {
-      $('.container_form').hide();
+      // $('.container_form').hide();
+      $('.login_form').hide();
+      $('.register_form').hide();
+
+      const user = Authentication.getUser();
+      const screen = ScreenState.get();
+      if (user && screen !== 'login') {
+        connectSocket(user.username);
+      }
+
+      switch (screen){
+        case 'login':
+          $('.login_form').show();
+          break;
+        case 'start_menu':
+          $('.start_menu').show();
+          break;
+        case 'game_room':
+           $('#img_bg').attr({
+            'src': 'asset/game_room.png',
+            // 'width': 2200,
+            // 'height': 1600
+          });
+          $('.start_menu').hide();
+          $('.game_container').show();
+          break;
+      }
+      console.log(ScreenState.get());
       console.log('Welcome back', Authentication.getUser()?.username);
     },
 
@@ -97,5 +130,6 @@ $(() => {
   // });
 
   // app.initialize();
-  background.initialize();
+  // background.initialize();
+  // gameRoom.initialize();
 });

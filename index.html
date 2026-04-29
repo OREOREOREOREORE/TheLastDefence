@@ -7,11 +7,11 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id="app">
-    </div>
-    <div id="background"></div>
+    <div id="app" style="display: none;"></div>
     <!-- <script type="module" src="/src/frontend/start.ts"></script> -->
     <script type="module" src="/src/frontend/index.ts"></script>
+
+    <img src="asset/background.png" alt="starting" id="img_bg" width="1800" height="1200">
 
     <div class="container_form">
 
@@ -33,14 +33,35 @@
         <input type="text" id="reg_username" name="username" placeholder="username"><br>
         <input type="password" id="reg_pwd" name="password" placeholder="password"><br>
         <input type="password" id="ver_pwd" name="verify password" placeholder="verify password"><br>
-        <label for=""><input type="checkbox">I agree to the terms & conditions</label><br>
+        <!-- <label for=""><input type="checkbox">I agree to the terms & conditions</label><br> -->
         <button type="submit" id="reg_btn">Register</button>
         <p>Already have an account?<a href="#" class="have_acc">Login</a></p>
       </form>
 
+      <div class="start_menu" style="display: none;">
+        <button id="btn_start">start</button>
+        <button id="btn_about">about</button>
+        <button id='btn_logout'>logout</button>
+      </div>
     </div>
 
-      <div class="message">Hello</div>
+    <div class="game_container" style="display: none;">
+      <div class="status" style="">
+        <label id="status-text">waiting...</label>
+        <button id="status-btn">ready</button>
+        <button id='status-leave'>leave</button>
+      </div>
+    </div>
+
+    <!-- <div class="start_container">
+      <div class="start_menu" style="">
+        <button id="btn_start">start</button>
+        <button id="btn_about">about</button>
+        <button id='btn_quit'>quit</button>
+      </div>
+    </div> -->
+
+    <div class="message">Hello</div>
 
   </body>
 </html>

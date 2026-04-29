@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { connectSocket, socket } from './socket';
 
 interface User{
     username: string;
@@ -8,6 +9,14 @@ interface Res{
     user: User;
     error: string;
     success:string;
+}
+
+type Screen = "login" | "start_menu" | "game_room" | "gaming";
+
+export const ScreenState = {
+    get(): Screen { return (sessionStorage.getItem("screen") as Screen | null) ?? "login"; },
+    set(s: Screen): void { sessionStorage.setItem("screen", s); },
+    clear(): void {sessionStorage.removeItem("screen");}
 }
 
 //Authentication
@@ -96,7 +105,10 @@ export function setupLogin() {
         () => { (
             $(".login_form").get(0) as HTMLFormElement).reset();
             $(".login_form").hide();
+            $(".start_menu").show();
+            ScreenState.set("start_menu");
             $(".message").text("play得!");
+            connectSocket(username);
         },
 
         (err) => { $(".message").text(err);}
@@ -126,6 +138,56 @@ export function setupLogin() {
         },
          (err) => { $(".message").text(err);}
       );
+    })
+
+    $('#btn_logout').on("click", (e) => {
+        e.preventDefault();
+        Authentication.signout(
+            () => {
+                $(".start_menu").hide();
+                $(".login_form").show();
+                $('#img_bg').attr('src', 'asset/background.png');
+                ScreenState.set('login');
+                socket.disconnect();
+            },
+            (err) => { $(".message").text(err); }
+        );
+    })
+
+    $('#btn_start').on("click", (e) =>{
+        e.preventDefault();
+        // $('#img_bg').attr('src', 'asset/game_room2.png');
+        $('#img_bg').attr({
+            'src': 'asset/game_room.png',
+            // 'width': 2200,
+            // 'height': 1600
+        });
+        $('.start_menu').hide();
+        $('.game_container').show();
+        socket.emit('joinRoom');
+        ScreenState.set('game_room');
+
+    })
+
+    $('#status-btn').on("click", (e) => {
+        e.preventDefault();
+        $('#status-btn').text();
+        console.log(socket.connected);
+        socket.emit('ready');
+    })
+
+    $('#status-leave').on('click', (e) =>{
+        console.log('leave room');
+        e.preventDefault();
+        $('#img_bg').attr({
+            'src': 'asset/background.png',
+            // 'width': 2200,
+            // 'height': 1600
+        });
+        $(".start_menu").show();
+        $(".game_container").hide();
+        ScreenState.set('start_menu');
+        socket.emit('leaveRoom');
     })
 
     $(".register a").on("click", (e) => {

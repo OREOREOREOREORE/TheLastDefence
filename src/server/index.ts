@@ -6,19 +6,17 @@ import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import argon2 from 'argon2';
 
+import process from 'node:process';
+import type { Request } from 'express';
+
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
-// Change later
-const ROOM_ID = 'abc';
-
 import { addNewGameState, decrementX, decrementY, incrementX, incrementY } from './game-state.ts';
-
-import process from 'node:process';
-
-import type { Request } from 'express';
-
 import type { GameStateUpdateRequestMessage } from '../common/game-state.ts';
+import { bothReady, findOrCreateRoom, leaveRoom, setReady, startGame } from './game-room.ts';
+
+
 
 interface Cookies {
   auth_token?: string;
@@ -60,14 +58,48 @@ ViteExpress.config({
 app.get('/message', (_, res) => res.send('Hello from express!'));
 
 websocketServer.on('connection', async (socket) => {
+  const username = socket.handshake.auth.username as string;
+  console.log(username);
   console.log('A client connected:', socket.id);
 
   // TODO: Change later
-  await socket.join(ROOM_ID);
-  addNewGameState(ROOM_ID, {
-    playerA: { x: 100, y: 100, health: 100 },
-    playerB: { x: 100, y: 200, health: 100 },
+  const player = {socketId: socket.id, username: username, ready: false};
+  const room = findOrCreateRoom(player);
+  const roomIdStr = room.roomId.toString();
+  await socket.join(roomIdStr);
+  // await socket.join(ROOM_ID)
+
+  if (room.status === "full"){
+    websocketServer.to(roomIdStr).emit('roomFull', {
+      roomId: room.roomId,
+      players: [room.player1?.socketId, room.player2?.socketId],
+    });
+  }else{
+    socket.emit('waiting', {roomId: room.roomId});
+  }
+
+  socket.on('ready', () => {
+    const rm = setReady(room.roomId, socket.id);
+    console.log(`Player ${socket.id} is ready in room ${room.roomId}`);
+    if (!rm) return;
+
+    websocketServer.to(roomIdStr).emit('readyUpdate', {
+      player1: rm.player1?.ready ?? false,
+      player2: rm.player2?.ready ?? false,
+    });
+
+    if (bothReady(rm)){
+      startGame(room.roomId);
+      addNewGameState(roomIdStr, {
+        playerA: { x: 100, y: 100, health: 100 },
+        playerB: { x: 100, y: 200, health: 100 },
+      });
+      websocketServer.to(roomIdStr).emit('gameStart', { roomId: room.roomId });
+    }
+    console.log('Current rooms:', room);
   });
+
+
 
   socket.on('incrementX', (data: GameStateUpdateRequestMessage) => {
     const newState = incrementX(data.roomId, data.player);
@@ -91,6 +123,7 @@ websocketServer.on('connection', async (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
+    leaveRoom(room.roomId, socket.id);
   });
 });
 

@@ -70,10 +70,33 @@ body{
 }
 
 
+
 .login_form{
     line-height: 2em;
     color: white;
 }
+
+/* startmenu */
+.container_form .start_menu{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 20rem;
+}
+
+.start_menu #btn_start, .start_menu #btn_about, .start_menu #btn_logout{
+    width: 250px;
+    height: 40px;
+    outline: none;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
 
 /* register form */
 .register_form #reg_username, #reg_pwd, #ver_pwd{
@@ -87,6 +110,38 @@ body{
     color: white;
     padding: 20px 45px 20px 20px;
 }
+
+/* gameroom */
+.game_container{
+    position: absolute;
+}
+
+.game_container .status{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 5rem;
+    margin-bottom: 8rem;
+}
+
+#status-text{
+    color: white;
+    font-size: 3rem;
+}
+
+#status-btn, #status-leave{
+    width: 150px;
+    height: 40px;
+    outline: none;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    margin-top: 1rem;
+    cursor: pointer;
+}
+
+
 
 /* error|success message */
 
