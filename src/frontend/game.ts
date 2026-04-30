@@ -3,8 +3,12 @@ import './control';
 
 import { Sprite } from '../engine/sprite';
 import { Application } from '../engine/application';
+import { Circle } from '../engine/circle';
+
+import $ from 'jquery';
 
 import playerSpriteSheet from '../../asset/player_sprite.png';
+import backgroundImage from '../../asset/game-background.png';
 
 import type { GameState } from '../common/game-state';
 
@@ -21,17 +25,21 @@ const PLAYER_SETTINGS = {
 export function initializeGame() {
   const app = new Application({
     rootElementSelector: '#app',
-    width: 800,
-    height: 600,
-    background: '#f0f0f0',
+    width: 1400,
+    height: 630,
+    background: `url(${backgroundImage}) no-repeat center/105%`,
     fps: 60,
   });
 
   const playerA = new Sprite(PLAYER_SETTINGS);
   const playerB = new Sprite(PLAYER_SETTINGS);
 
-  app.registerSprite('playerA', playerA);
-  app.registerSprite('playerB', playerB);
+  const clip = new Circle(100, 100, 100);
+  clip.setMode('clip');
+  app.registerObject('clip', clip);
+
+  app.registerObject('playerA', playerA);
+  app.registerObject('playerB', playerB);
 
   playerA.setSequence('moveLeft');
   playerB.setSequence('moveLeft');
@@ -41,6 +49,19 @@ export function initializeGame() {
 
   playerB.canvasX = 100;
   playerB.canvasY = 200;
+
+  $(document).on('mousemove', (event) => {
+    const canvasRect = app.getCanvasRect();
+    if (!canvasRect) return;
+
+    console.log('Mouse move:', event.clientX, event.clientY);
+
+    const canvasX = event.clientX - canvasRect.left;
+    const canvasY = event.clientY - canvasRect.top;
+
+    clip.canvasX = canvasX;
+    clip.canvasY = canvasY;
+  });
 
   socket.on('gameStateUpdate', (newState: GameState) => {
     playerA.canvasX = newState.playerA.x;

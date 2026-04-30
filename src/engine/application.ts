@@ -1,7 +1,7 @@
 import { Ticker } from './ticker';
 
-import type { Sprite } from './sprite';
 import type { TickerListener, Time } from './ticker';
+import type { BaseObject } from './base-object';
 
 interface ApplicationOptions {
   /**
@@ -49,7 +49,7 @@ export class Application extends EventTarget {
   private height: number;
   private background: string;
 
-  private sprites = new Map<string, Sprite>();
+  private objects = new Map<string, BaseObject>();
 
   private ticker: Ticker;
 
@@ -89,11 +89,16 @@ export class Application extends EventTarget {
       return;
     }
 
+    // Save the global context for restoration. Some operation like clipping does not (and should not) automatically restore
+    this.canvasContext.save();
+
     this.canvasContext.clearRect(0, 0, this.width, this.height);
 
-    for (const sprite of this.sprites.values()) {
+    for (const sprite of this.objects.values()) {
       sprite.tick(time.current, this.canvasContext);
     }
+
+    this.canvasContext.restore();
   }
 
   private canvasClickHandler(event: MouseEvent) {
@@ -111,8 +116,8 @@ export class Application extends EventTarget {
 
     this.dispatchEvent(clickEvent);
 
-    for (const sprite of this.sprites.values()) {
-      sprite.notifyClick(new DOMPoint(canvasClickX, canvasClickY));
+    for (const object of this.objects.values()) {
+      object.notifyClick(new DOMPoint(canvasClickX, canvasClickY));
     }
   }
 
@@ -128,7 +133,6 @@ export class Application extends EventTarget {
     this.canvas.width = this.width;
     this.canvas.height = this.height;
     this.canvas.style.background = this.background;
-    this.canvas.style.backgroundSize = 'cover';
 
     this.rootElement.appendChild(this.canvas);
 
@@ -147,26 +151,26 @@ export class Application extends EventTarget {
   }
 
   /**
-   * Registers a sprite instance under a name.
+   * Registers an object instance under a name.
    *
-   * If the name already exists, the previous sprite is replaced.
+   * If the name already exists, the previous object is replaced.
    */
-  public registerSprite(name: string, sprite: Sprite) {
-    this.sprites.set(name, sprite);
+  public registerObject(name: string, object: BaseObject) {
+    this.objects.set(name, object);
   }
 
   /**
-   * Deregisters a sprite by name.
+   * Deregisters an object by name.
    */
-  public removeSprite(name: string) {
-    this.sprites.delete(name);
+  public removeObject(name: string) {
+    this.objects.delete(name);
   }
 
   /**
-   * Returns a previously registered sprite by name.
+   * Returns a previously registered object by name.
    */
-  public getSprite(name: string) {
-    return this.sprites.get(name);
+  public getObject(name: string) {
+    return this.objects.get(name);
   }
 
   /**
@@ -177,5 +181,21 @@ export class Application extends EventTarget {
    */
   public onTick(listener: TickerListener) {
     return this.ticker.addListener(listener);
+  }
+
+  /**
+   * Gets the bounding rectangle of the canvas in page coordinates.
+   * @returns The bounding rectangle of the canvas, or `undefined` if the canvas is not initialized.
+   */
+  public getCanvasRect() {
+    return this.canvas?.getBoundingClientRect();
+  }
+
+  public saveContextState() {
+    this.canvasContext?.save();
+  }
+
+  public restoreContextState() {
+    this.canvasContext?.restore();
   }
 }
