@@ -60,9 +60,9 @@ class SoundManager {
 
 }
 
-/* SoundManager Usage
-sound.playSfx('coin');
-sound.playSfx('coin', 0.5);   // half volume
+/* SoundManager docs
+sound.playSfx('shoot');
+sound.playSfx('shoot', 0.5);   // half volume
 sound.playBgm('bgm');
 sound.stopBgm();
 
