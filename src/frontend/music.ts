@@ -61,14 +61,14 @@ class SoundManager {
 }
 
 /* SoundManager docs
-sound.playSfx('shoot');
-sound.playSfx('shoot', 0.5);   // half volume
-sound.playBgm('bgm');
-sound.stopBgm();
+sounds.playSfx('shoot');
+sounds.playSfx('shoot', 0.5);   // half volume
+sounds.playBgm('bgm');
+sounds.stopBgm();
 
-sound.setMusicVolume(0.4);
-sound.setSfxVolume(0.8);
-sound.setMuted(true);
+sounds.setMusicVolume(0.4);
+sounds.setSfxVolume(0.8);
+sounds.setMuted(true);
 */
 
 export default new SoundManager();
