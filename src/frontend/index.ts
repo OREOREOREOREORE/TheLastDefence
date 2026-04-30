@@ -1,10 +1,16 @@
 import $ from 'jquery';
 import { setupLogin, Authentication } from './login';
 import { Application } from '../engine/application';
+import sounds from './music';
 
 import backgroundImage from '../../asset/background.png';
 
+await Promise.all([
+  sounds.load('bg', 'src/frontend/sounds/Gold_Coin_Sprint.mp3'),
+]);
+
 $(() => {
+  sounds.playBgm('bg', 0.1);
   setupLogin();
   import('./game')
     .then(({ initializeGame }) => {
