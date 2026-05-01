@@ -161,31 +161,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
     }
 
     timeRemainingElement.text(formatTimeRemaining(newState.timeRemaining));
-
-    // for (const weapon of newState.weapons) {
-    // if (!weapons.has(weapon.id)) {
-    //   const weaponSprite = new Sprite({
-    //     src: playerSpriteSheet,
-    //     spriteWidth: 13,
-    //     spriteHeight: 5,
-    //     scale: 2,
-    //     sequences: {
-    //       default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
-    //     },
-    //   });
-
-    //   weaponSprite.setSequence('default');
-    //   weaponSprite.canvasX = weapon.x;
-    //   weaponSprite.canvasY = weapon.y;
-    //   weaponSprite.rotation = weapon.rotation;
-
-    //   app.registerObject(weapon.id, weaponSprite);
-    //   weapons.add(weapon.id);
-    // } else {
-    //   app.removeObject(weapon.id);
-    //   weapons.delete(weapon.id);
-    // }
-    // }
   });
 
   app.initialize();
