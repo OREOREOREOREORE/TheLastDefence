@@ -7,4 +7,7 @@ export abstract class BaseObject {
    */
   abstract tick(time: number, context: CanvasRenderingContext2D): void;
   abstract notifyClick(point: DOMPoint): void;
+
+  abstract canvasX: number;
+  abstract canvasY: number;
 }

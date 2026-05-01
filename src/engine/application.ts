@@ -198,4 +198,12 @@ export class Application extends EventTarget {
   public restoreContextState() {
     this.canvasContext?.restore();
   }
+
+  public getWidth() {
+    return this.width;
+  }
+
+  public getHeight() {
+    return this.height;
+  }
 }

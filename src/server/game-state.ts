@@ -15,10 +15,10 @@ export function getGameState(roomId: string): GameState | undefined {
 export function incrementX(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
   if (state) {
-    if (player === 'A') {
-      state.playerA.x += DELTA;
+    if (player === 1) {
+      state.player1.x += DELTA;
     } else {
-      state.playerB.x += DELTA;
+      state.player2.x += DELTA;
     }
   }
 
@@ -28,10 +28,10 @@ export function incrementX(roomId: string, player: PlayerId) {
 export function decrementX(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
   if (state) {
-    if (player === 'A') {
-      state.playerA.x -= DELTA;
+    if (player === 1) {
+      state.player1.x -= DELTA;
     } else {
-      state.playerB.x -= DELTA;
+      state.player2.x -= DELTA;
     }
   }
 
@@ -41,10 +41,10 @@ export function decrementX(roomId: string, player: PlayerId) {
 export function incrementY(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
   if (state) {
-    if (player === 'A') {
-      state.playerA.y += DELTA;
+    if (player === 1) {
+      state.player1.y += DELTA;
     } else {
-      state.playerB.y += DELTA;
+      state.player2.y += DELTA;
     }
   }
 
@@ -54,11 +54,44 @@ export function incrementY(roomId: string, player: PlayerId) {
 export function decrementY(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
   if (state) {
-    if (player === 'A') {
-      state.playerA.y -= DELTA;
+    if (player === 1) {
+      state.player1.y -= DELTA;
     } else {
-      state.playerB.y -= DELTA;
+      state.player2.y -= DELTA;
     }
+  }
+
+  return state;
+}
+
+export function addWeapon(
+  roomId: string,
+  player: PlayerId,
+  weaponId: string,
+  rotation: number,
+  createdAt: number,
+  directionNormVector: { x: number; y: number },
+) {
+  const state = gameStates.get(roomId);
+  if (state) {
+    const playerState = player === 1 ? state.player1 : state.player2;
+    state.weapons.push({
+      id: weaponId,
+      x: playerState.x,
+      y: playerState.y,
+      rotation,
+      createdAt,
+      directionNormVector,
+    });
+  }
+
+  return state;
+}
+
+export function removeWeapon(roomId: string, weaponId: string) {
+  const state = gameStates.get(roomId);
+  if (state) {
+    state.weapons = state.weapons.filter((weapon) => weapon.id !== weaponId);
   }
 
   return state;

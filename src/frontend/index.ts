@@ -8,6 +8,7 @@ await Promise.all([sounds.load('bg', backgroundMusic)]);
 
 $(() => {
   initializeUI();
+  sounds.playBgm('bg', 0.1);
   // import('./game')
   //   .then(({ initializeGame }) => {
   //     initializeGame();
@@ -15,7 +16,6 @@ $(() => {
   //   .catch((error: unknown) => {
   //     console.error('Error loading game module:', error);
   //   });
-  sounds.playBgm('bg', 0.1);
 
   // const app = new Application({
   //   rootElementSelector: '#app',

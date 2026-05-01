@@ -12,8 +12,20 @@ import type { Request } from 'express';
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
-import { addNewGameState, decrementX, decrementY, incrementX, incrementY } from './game-state.ts';
-import type { GameStateUpdateRequestMessage } from '../common/game-state.ts';
+import {
+  addNewGameState,
+  decrementX,
+  decrementY,
+  incrementX,
+  incrementY,
+  addWeapon,
+  removeWeapon,
+} from './game-state.ts';
+import type {
+  AddWeaponRequestMessage,
+  GameStateUpdateRequestMessage,
+  RemoveWeaponRequestMessage,
+} from '../common/game-state.ts';
 import {
   rooms,
   bothReady,
@@ -110,8 +122,9 @@ websocketServer.on('connection', (socket) => {
     if (bothReady(room)) {
       startGame(parseInt(roomId, 10));
       addNewGameState(roomId, {
-        playerA: { x: 100, y: 100, health: 100 },
-        playerB: { x: 100, y: 200, health: 100 },
+        player1: { x: 100, y: 100, health: 100 },
+        player2: { x: 100, y: 200, health: 100 },
+        weapons: [],
       });
       websocketServer.to(roomId).emit('gameStart');
     }
@@ -147,6 +160,23 @@ websocketServer.on('connection', (socket) => {
 
   socket.on('decrementY', (data: GameStateUpdateRequestMessage) => {
     const newState = decrementY(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('addWeapon', (data: AddWeaponRequestMessage) => {
+    const newState = addWeapon(
+      data.roomId,
+      data.player,
+      data.weaponId,
+      data.rotation,
+      data.createdAt,
+      data.directionNormVector,
+    );
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('removeWeapon', (data: RemoveWeaponRequestMessage) => {
+    const newState = removeWeapon(data.roomId, data.weaponId);
     websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
   });
 

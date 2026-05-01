@@ -1,16 +1,17 @@
 import { socket } from './socket';
-import './control';
+import { initializeControl } from './control';
 
 import { Sprite } from '../engine/sprite';
 import { Application } from '../engine/application';
-import { Circle } from '../engine/circle';
+// import { Circle } from '../engine/circle';
 
-import $ from 'jquery';
+// import $ from 'jquery';
 
 import playerSpriteSheet from '../../asset/player_sprite.png';
+import weaponSpriteSheet from '../../asset/arrow.png';
 import backgroundImage from '../../asset/game-background.png';
 
-import type { GameState } from '../common/game-state';
+import type { GameState, PlayerId, WeaponState } from '../common/game-state';
 
 const PLAYER_SETTINGS = {
   src: playerSpriteSheet,
@@ -22,7 +23,20 @@ const PLAYER_SETTINGS = {
   },
 };
 
-export function initializeGame() {
+const WEAPON_SETTINGS = {
+  src: weaponSpriteSheet,
+  spriteWidth: 13,
+  spriteHeight: 5,
+  scale: 2,
+  sequences: {
+    default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
+  },
+};
+
+// Set of active weapon IDs registered locally, should be synced with the server state.
+const localWeaponsState = new Map<string, WeaponState>();
+
+export function initializeGame(roomId: string, player: PlayerId) {
   const app = new Application({
     rootElementSelector: '#game-container',
     width: 1400,
@@ -31,15 +45,17 @@ export function initializeGame() {
     fps: 60,
   });
 
+  initializeControl(roomId, player, app);
+
   const playerA = new Sprite(PLAYER_SETTINGS);
   const playerB = new Sprite(PLAYER_SETTINGS);
 
-  const clip = new Circle(100, 100, 100);
-  clip.setMode('clip');
-  app.registerObject('clip', clip);
+  // const clip = new Circle(100, 100, 100);
+  // clip.setMode('clip');
+  // app.registerObject('clip', clip);
 
-  app.registerObject('playerA', playerA);
-  app.registerObject('playerB', playerB);
+  app.registerObject('player1', playerA);
+  app.registerObject('player2', playerB);
 
   playerA.setSequence('moveLeft');
   playerB.setSequence('moveLeft');
@@ -50,25 +66,109 @@ export function initializeGame() {
   playerB.canvasX = 100;
   playerB.canvasY = 200;
 
-  $(document).on('mousemove', (event) => {
-    const canvasRect = app.getCanvasRect();
-    if (!canvasRect) return;
+  app.onTick(() => {
+    for (const weapon of localWeaponsState.values()) {
+      const timeElapsed = performance.now() - weapon.createdAt;
+      const distanceTraveled = timeElapsed * 0.5;
 
-    console.log('Mouse move:', event.clientX, event.clientY);
+      const newX = weapon.x + weapon.directionNormVector.x * distanceTraveled;
+      const newY = weapon.y + weapon.directionNormVector.y * distanceTraveled;
 
-    const canvasX = event.clientX - canvasRect.left;
-    const canvasY = event.clientY - canvasRect.top;
+      if (
+        (newX < 0 ||
+          newX > app.getWidth() ||
+          newY < 0 ||
+          newY > app.getHeight()) &&
+        weapon.id.startsWith(`player${player}-`)
+      ) {
+        socket.emit('removeWeapon', { roomId, player, weaponId: weapon.id });
+        continue;
+      }
 
-    clip.canvasX = canvasX;
-    clip.canvasY = canvasY;
+      const weaponSprite = app.getObject(weapon.id) as Sprite | undefined;
+      if (weaponSprite) {
+        weaponSprite.canvasX = newX;
+        weaponSprite.canvasY = newY;
+      }
+    }
   });
 
-  socket.on('gameStateUpdate', (newState: GameState) => {
-    playerA.canvasX = newState.playerA.x;
-    playerA.canvasY = newState.playerA.y;
+  // $(document).on('mousemove', (event) => {
+  //   const canvasRect = app.getCanvasRect();
+  //   if (!canvasRect) return;
 
-    playerB.canvasX = newState.playerB.x;
-    playerB.canvasY = newState.playerB.y;
+  //   const canvasX = event.clientX - canvasRect.left;
+  //   const canvasY = event.clientY - canvasRect.top;
+
+  //   arrow.rotation = Math.atan2(
+  //     canvasY - arrow.canvasY,
+  //     canvasX - arrow.canvasX,
+  //   );
+  // });
+
+  socket.on('gameStateUpdate', (newState: GameState) => {
+    console.log('Received game state update:', newState);
+    playerA.canvasX = newState.player1.x;
+    playerA.canvasY = newState.player1.y;
+
+    playerB.canvasX = newState.player2.x;
+    playerB.canvasY = newState.player2.y;
+
+    const weaponsMap = new Map(
+      newState.weapons.map((weapon) => [weapon.id, weapon]),
+    );
+    const remoteWeaponIds = new Set(weaponsMap.keys());
+    const localWeaponIds = new Set(localWeaponsState.keys());
+
+    const newWeaponIds = remoteWeaponIds.difference(localWeaponIds);
+    const removedWeaponIds = localWeaponIds.difference(remoteWeaponIds);
+
+    for (const weaponId of newWeaponIds) {
+      const weapon = weaponsMap.get(weaponId);
+      if (!weapon) {
+        continue;
+      }
+
+      const weaponSprite = new Sprite(WEAPON_SETTINGS);
+      weaponSprite.setSequence('default');
+      weaponSprite.canvasX = weapon.x;
+      weaponSprite.canvasY = weapon.y;
+      weaponSprite.rotation = weapon.rotation;
+
+      app.registerObject(weapon.id, weaponSprite);
+      localWeaponsState.set(weapon.id, weapon);
+    }
+
+    for (const weaponId of removedWeaponIds) {
+      console.log('Removing weapon with ID:', weaponId);
+      app.removeObject(weaponId);
+      localWeaponsState.delete(weaponId);
+    }
+
+    // for (const weapon of newState.weapons) {
+    // if (!weapons.has(weapon.id)) {
+    //   const weaponSprite = new Sprite({
+    //     src: playerSpriteSheet,
+    //     spriteWidth: 13,
+    //     spriteHeight: 5,
+    //     scale: 2,
+    //     sequences: {
+    //       default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
+    //     },
+    //   });
+
+    //   weaponSprite.setSequence('default');
+    //   weaponSprite.canvasX = weapon.x;
+    //   weaponSprite.canvasY = weapon.y;
+    //   weaponSprite.rotation = weapon.rotation;
+
+    //   app.registerObject(weapon.id, weaponSprite);
+    //   weapons.add(weapon.id);
+    // } else {
+    //   app.removeObject(weapon.id);
+    //   weapons.delete(weapon.id);
+    // }
+    // }
   });
 
   app.initialize();
