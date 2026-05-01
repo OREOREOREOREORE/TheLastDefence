@@ -1,5 +1,10 @@
 import $ from 'jquery';
 import { initializeUI } from './ui';
+import sounds from './music';
+
+await Promise.all([
+  sounds.load('bg', 'src/frontend/sounds/Gold_Coin_Sprint.mp3'),
+]);
 
 $(() => {
   initializeUI();
@@ -10,6 +15,7 @@ $(() => {
   //   .catch((error: unknown) => {
   //     console.error('Error loading game module:', error);
   //   });
+  sounds.playBgm('bg', 0.1);
 
   // const app = new Application({
   //   rootElementSelector: '#app',
