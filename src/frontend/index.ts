@@ -1,17 +1,15 @@
 import $ from 'jquery';
-import { setupLogin, Authentication, ScreenState} from './login';
-import { Application } from '../engine/application';
-import { connectSocket } from './socket';
+import { initializeUI } from './ui';
 
 $(() => {
-  setupLogin();
-  import('./game')
-    .then(({ initializeGame }) => {
-      initializeGame();
-    })
-    .catch((error: unknown) => {
-      console.error('Error loading game module:', error);
-    });
+  initializeUI();
+  // import('./game')
+  //   .then(({ initializeGame }) => {
+  //     initializeGame();
+  //   })
+  //   .catch((error: unknown) => {
+  //     console.error('Error loading game module:', error);
+  //   });
 
   // const app = new Application({
   //   rootElementSelector: '#app',
@@ -34,45 +32,6 @@ $(() => {
   //   height: 1100,
   //   background: `url(${gameRoomImage}) no-repeat center`,
   // });
-
-  Authentication.validate(
-    () => {
-      // $('.container_form').hide();
-      $('.login_form').hide();
-      $('.register_form').hide();
-
-      const user = Authentication.getUser();
-      const screen = ScreenState.get();
-      if (user && screen !== 'login') {
-        connectSocket(user.username);
-      }
-
-      switch (screen){
-        case 'login':
-          $('.login_form').show();
-          break;
-        case 'start_menu':
-          $('.start_menu').show();
-          break;
-        case 'game_room':
-           $('#img_bg').attr({
-            'src': 'asset/game_room.png',
-            // 'width': 2200,
-            // 'height': 1600
-          });
-          $('.start_menu').hide();
-          $('.game_container').show();
-          break;
-      }
-      console.log(ScreenState.get());
-      console.log('Welcome back', Authentication.getUser()?.username);
-    },
-
-    () => {
-      $('.container_form').show();
-      console.log('validate failed');
-    },
-  );
 
   // const player = new Sprite({
   //   src: playerSpriteSheet,

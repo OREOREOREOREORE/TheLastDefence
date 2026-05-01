@@ -14,9 +14,16 @@ import { createServer } from 'node:http';
 
 import { addNewGameState, decrementX, decrementY, incrementX, incrementY } from './game-state.ts';
 import type { GameStateUpdateRequestMessage } from '../common/game-state.ts';
-import {rooms, waitingQueue, bothReady, findOrCreateRoom, findRoomByUsername, leaveRoom, setReady, startGame } from './game-room.ts';
+import {
+  rooms,
+  bothReady,
+  findOrCreateRoom,
+  leaveRoom,
+  setReady,
+  startGame,
+} from './game-room.ts';
 
-
+import type { Room } from '../common/game-room.d.ts';
 
 interface Cookies {
   auth_token?: string;
@@ -57,57 +64,71 @@ ViteExpress.config({
 
 app.get('/message', (_, res) => res.send('Hello from express!'));
 
-websocketServer.on('connection', async (socket) => {
+websocketServer.on('connection', (socket) => {
   const username = (socket.handshake.auth as { username?: string }).username;
-  if (!username){
+  if (!username) {
     console.log('Rejecting connection without username:', socket.id);
     socket.disconnect();
     return;
   }
   console.log('A client connected:', socket.id, username);
-
   const player = { socketId: socket.id, username, ready: false };
-  const room = findOrCreateRoom(player);
-  const roomIdStr = room.roomId.toString();
-  await socket.join(roomIdStr);
-  console.log(rooms, waitingQueue);
+  socket.on('start', async (_, callback: (room: Room) => void) => {
+    const room = findOrCreateRoom(player);
+    const roomIdStr = room.roomId.toString();
+    console.log('Player', username, 'is trying to join room', roomIdStr);
+    await socket.join(roomIdStr);
 
-  if (room.status === "full"){
-    websocketServer.to(roomIdStr).emit('roomFull', {
-      roomId: room.roomId,
-      players: [room.player1?.username, room.player2?.username],
-    });
-  }else{
-    socket.emit('waiting', {roomId: room.roomId});
-  }
+    websocketServer.to(roomIdStr).emit('roomUpdate', room);
 
-  socket.on('ready', () => {
-    const rm = setReady(room.roomId, username);
-    console.log(`Player ${username} is ready in room ${room.roomId}`);
-    if (!rm) return;
+    console.log(
+      'joined room',
+      roomIdStr,
+      'players:',
+      room.players.map((p) => p.username),
+    );
+    // socket.emit('roomJoined', roomIdStr);
+    callback(room);
+  });
 
-    websocketServer.to(roomIdStr).emit('readyUpdate', {
-      player1: rm.player1?.ready ?? false,
-      player2: rm.player2?.ready ?? false,
-    });
+  // if (room.status === "full"){
+  //   websocketServer.to(roomIdStr).emit('roomFull', {
+  //     roomId: room.roomId,
+  //     players: [room.players[0]?.username, room.players[1]?.username],
+  //   });
+  // }else{
+  //   socket.emit('waiting', {roomId: room.roomId});
+  // }
 
-    if (bothReady(rm)){
-      startGame(room.roomId);
-      addNewGameState(roomIdStr, {
+  socket.on('ready', (roomId: string) => {
+    const room = setReady(parseInt(roomId, 10), username);
+    console.log(`Player ${username} is ready in room ${roomId}`);
+    if (!room) return;
+
+    websocketServer.to(roomId).emit('roomUpdate', room);
+
+    if (bothReady(room)) {
+      startGame(parseInt(roomId, 10));
+      addNewGameState(roomId, {
         playerA: { x: 100, y: 100, health: 100 },
         playerB: { x: 100, y: 200, health: 100 },
       });
-      websocketServer.to(roomIdStr).emit('gameStart', { roomId: room.roomId });
+      websocketServer.to(roomId).emit('gameStart');
     }
     // console.log('Current rooms:', room);
   });
 
-  socket.on('leaveRoom', () => {
-    leaveRoom(room.roomId, username);
-    void socket.leave(roomIdStr);
+  socket.on('leaveRoom', async (roomId: string, callback: () => void) => {
+    leaveRoom(parseInt(roomId, 10), username);
+    await socket.leave(roomId);
+
+    const room = rooms.get(parseInt(roomId, 10));
+    if (room) {
+      websocketServer.to(roomId).emit('roomUpdate', room);
+    }
+
+    callback();
   });
-
-
 
   socket.on('incrementX', (data: GameStateUpdateRequestMessage) => {
     const newState = incrementX(data.roomId, data.player);
@@ -131,17 +152,24 @@ websocketServer.on('connection', async (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id, username);
-    // Grace period so a refresh/reconnect by the same username keeps the room.
-    setTimeout(() => {
-      const current = findRoomByUsername(username);
-      if (current?.roomId === room.roomId){
-        const slot =
-          current.player1?.username === username ? current.player1 :
-          current.player2?.username === username ? current.player2 : undefined;
-        if (slot && slot.socketId !== socket.id) return; // reconnected
+    for (const room of rooms.values()) {
+      if (room.players.some((p) => p.socketId === socket.id)) {
+        console.log(
+          `Player ${username} was in room ${room.roomId}, processing leaveRoom...`,
+        );
+        leaveRoom(room.roomId, username);
       }
-      leaveRoom(room.roomId, username);
-    }, 3000);
+    }
+    // Grace period so a refresh/reconnect by the same username keeps the room.
+    // setTimeout(() => {
+    //   const current = findRoomByUsername(username);
+    //   if (current?.roomId === room.roomId){
+    //     const slot =
+    //       current.player1?.username === username ? current.player1 :
+    //       current.player2?.username === username ? current.player2 : undefined;
+    //     if (slot && slot.socketId !== socket.id) return; // reconnected
+    //   }
+    // }, 3000);
   });
 });
 
@@ -241,6 +269,8 @@ httpServer.listen(8000, () => {
 
 process.on('SIGINT', () => {
   console.log('Shutting down server...');
+
+  websocketServer.disconnectSockets();
 
   websocketServer
     .close()

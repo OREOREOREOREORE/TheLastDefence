@@ -24,7 +24,7 @@ const PLAYER_SETTINGS = {
 
 export function initializeGame() {
   const app = new Application({
-    rootElementSelector: '#app',
+    rootElementSelector: '#game-container',
     width: 1400,
     height: 630,
     background: `url(${backgroundImage}) no-repeat center/105%`,

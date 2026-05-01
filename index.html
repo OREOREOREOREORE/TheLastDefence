@@ -4,64 +4,139 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Last Defense</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="app" style="display: none;"></div>
-    <!-- <script type="module" src="/src/frontend/start.ts"></script> -->
-    <script type="module" src="/src/frontend/index.ts"></script>
+    <div id="game-container" class="hidden"></div>
+    <div id="home-container" class="flex flex-column">
+      <form id="login-form" class="form flex flex-column" autocomplete="off">
+        <h1>Login</h1>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="username"
+          class="input"
+        />
+        <input
+          type="password"
+          id="pwd"
+          name="password"
+          placeholder="password"
+          class="input"
+        />
+        <button type="submit" id="login-btn" class="btn">Let's start</button>
+        <div>
+          <p>Don't have an account? <a href="#" id="register-link">register</a></p>
+        </div>
+        <p class="message"></p>
+      </form>
+      <form id="register-form" class="form hidden flex-column" autocomplete="off">
+        <h1>Registration</h1>
+        <input
+          type="text"
+          id="reg-username"
+          name="username"
+          placeholder="Username"
+          class="input"
+        />
+        <input
+          type="password"
+          id="reg-pwd"
+          name="password"
+          placeholder="Password"
+          class="input"
+        />
+        <input
+          type="password"
+          id="ver-pwd"
+          name="Verify Password"
+          placeholder="Verify password"
+          class="input"
+        />
+        <button type="submit" id="reg-btn" class="btn">Register</button>
+        <p>Already have an account?<a href="#" id="login-link">Login</a></p>
+        <p class="message"></p>
+      </form>
+      <div id="start-menu" class="hidden flex-column">
+        <button id="btn-start" class="btn">Start</button>
+        <button id="btn-about" class="btn">About</button>
+        <button id="btn-logout" class="btn">Logout</button>
+      </div>
+    </div>
+    <div id="game-room-container" class="hidden flex-column">
+      <p id="room-number-text">Room <span id="room-number">#</span></p>
+      <div id="players-container" class="flex">
+        <div class="player-info flex flex-column">
+          <img src="asset/player1-avatar.png" alt="player1" class="player-avatar">
+          <label id="player1-label"></label>
+        </div>
+        <div class="player-info flex flex-column">
+          <img src="asset/player2-avatar.png" alt="player2" class="player-avatar">
+          <label id="player2-label"></label>
+        </div>
+      </div>
+      <button id="ready-button" class="btn">I'm Ready!</button>
+      <button id="leave-room-button" class="btn">Leave this room</button>
+    </div>
 
-    <img src="asset/background.png" alt="starting" id="img_bg" width="1800" height="1200">
+    <!-- <img src="asset/background.png" alt="starting" id="img-bg"> -->
 
-    <div class="container_form">
+    <!-- <div id="form-container"> -->
 
-      <form class="login_form">
+    <!-- <form id="login-form">
         <h1>Login</h1>
         <input type="text" id="username" name="username" placeholder="username"><br>
         <input type="password" id="pwd" name="password" placeholder="password"><br>
-        <div class="rmb-forget">
+        <div id="rmb-forget">
           <label for=""><input type="checkbox">remember me!</label>
         </div>
-        <button type="submit" id="login_btn">玩得啦！</button>
-        <div class="register">
+        <button type="submit" id="login-btn">玩得啦！</button>
+        <div id="register">
           <p>don't have an account?<a href="#">register</a></p>
         </div>
       </form>
 
-      <form class="register_form" style="display: none;">
+      <form id="register-form" class="hidden">
         <h1>Registration</h1>
-        <input type="text" id="reg_username" name="username" placeholder="username"><br>
-        <input type="password" id="reg_pwd" name="password" placeholder="password"><br>
-        <input type="password" id="ver_pwd" name="verify password" placeholder="verify password"><br>
-        <!-- <label for=""><input type="checkbox">I agree to the terms & conditions</label><br> -->
-        <button type="submit" id="reg_btn">Register</button>
-        <p>Already have an account?<a href="#" class="have_acc">Login</a></p>
+        <input type="text" id="reg-username" name="username" placeholder="username"><br>
+        <input type="password" id="reg-pwd" name="password" placeholder="password"><br>
+        <input type="password" id="ver-pwd" name="verify password" placeholder="verify password"><br>
+        <button type="submit" id="reg-btn">Register</button>
+        <p>Already have an account?<a href="#" class="have-acc">Login</a></p>
       </form>
 
-      <div class="start_menu" style="display: none;">
-        <button id="btn_start">start</button>
-        <button id="btn_about">about</button>
-        <button id='btn_logout'>logout</button>
+      <div id="start-menu" class="hidden">
+        <button id="btn-start" class="btn">start</button>
+        <button id="btn-about" class="btn">about</button>
+        <button id="btn-logout" class="btn">logout</button>
       </div>
     </div>
 
-    <div class="game_container" style="display: none;">
-      <div class="status" style="">
+    <div id="game-container" class="hidden">
+      <div class="status">
         <label id="status-text">waiting...</label>
         <button id="status-btn">ready</button>
         <button id='status-leave'>leave</button>
       </div>
     </div>
 
-    <!-- <div class="start_container">
-      <div class="start_menu" style="">
-        <button id="btn_start">start</button>
-        <button id="btn_about">about</button>
-        <button id='btn_quit'>quit</button>
+    <div class="start-container">
+      <div class="start-menu" style="">
+        <button id="btn-start">start</button>
+        <button id="btn-about">about</button>
+        <button id='btn-quit'>quit</button>
       </div>
-    </div> -->
+    </div> 
 
-    <div class="message">Hello</div>
+    <div class="message"></div>-->
 
+    <script type="module" src="/src/frontend/index.ts"></script>
   </body>
 </html>
