@@ -17,6 +17,7 @@ export interface GameState {
   player1: PlayerState;
   player2: PlayerState;
   weapons: WeaponState[];
+  timeRemaining: number;
 }
 
 export type PlayerId = 1 | 2;

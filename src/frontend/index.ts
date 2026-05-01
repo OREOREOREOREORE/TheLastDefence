@@ -3,8 +3,12 @@ import { initializeUI } from './ui';
 import sounds from './music';
 
 import backgroundMusic from '../../asset/sounds/Gold_Coin_Sprint.mp3';
+import arrowSFX from '../../asset/sounds/arrow.wav';
 
-await Promise.all([sounds.load('bg', backgroundMusic)]);
+await Promise.all([
+  sounds.load('bg', backgroundMusic),
+  sounds.load('shoot', arrowSFX),
+]);
 
 $(() => {
   initializeUI();

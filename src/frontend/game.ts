@@ -5,11 +5,13 @@ import { Sprite } from '../engine/sprite';
 import { Application } from '../engine/application';
 // import { Circle } from '../engine/circle';
 
-// import $ from 'jquery';
+import $ from 'jquery';
 
 import playerSpriteSheet from '../../asset/player_sprite.png';
 import weaponSpriteSheet from '../../asset/arrow.png';
 import backgroundImage from '../../asset/game-background.png';
+
+import sounds from './music';
 
 import type { GameState, PlayerId, WeaponState } from '../common/game-state';
 
@@ -33,10 +35,21 @@ const WEAPON_SETTINGS = {
   },
 };
 
-// Set of active weapon IDs registered locally, should be synced with the server state.
-const localWeaponsState = new Map<string, WeaponState>();
+function formatTimeRemaining(milliseconds: number) {
+  const numberOfMinutes = Math.floor(milliseconds / (60 * 1000));
+  const numberOfSeconds = Math.floor((milliseconds % (60 * 1000)) / 1000);
+
+  const minutesString = numberOfMinutes.toString().padStart(2, '0');
+  const secondsString = numberOfSeconds.toString().padStart(2, '0');
+
+  return `${minutesString}:${secondsString}`;
+}
 
 export function initializeGame(roomId: string, player: PlayerId) {
+  // Set of active weapon IDs registered locally, should be synced with the server state.
+  const localWeaponsState = new Map<string, WeaponState>();
+  const timeRemainingElement = $('#time-remaining');
+
   const app = new Application({
     rootElementSelector: '#game-container',
     width: 1400,
@@ -129,6 +142,8 @@ export function initializeGame(roomId: string, player: PlayerId) {
         continue;
       }
 
+      sounds.playSfx('shoot', 0.2);
+
       const weaponSprite = new Sprite(WEAPON_SETTINGS);
       weaponSprite.setSequence('default');
       weaponSprite.canvasX = weapon.x;
@@ -144,6 +159,8 @@ export function initializeGame(roomId: string, player: PlayerId) {
       app.removeObject(weaponId);
       localWeaponsState.delete(weaponId);
     }
+
+    timeRemainingElement.text(formatTimeRemaining(newState.timeRemaining));
 
     // for (const weapon of newState.weapons) {
     // if (!weapons.has(weapon.id)) {
