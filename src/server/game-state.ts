@@ -3,6 +3,8 @@ import type { GameState, PlayerId } from '../common/game-state.ts';
 const DELTA = 10;
 
 const gameStates = new Map<string, GameState>();
+// Timeout can't be serialized, so we keep it separate from the game state.
+const gameIntervals = new Map<string, NodeJS.Timeout>();
 
 export function addNewGameState(roomId: string, initialState: GameState) {
   gameStates.set(roomId, initialState);
@@ -95,4 +97,30 @@ export function removeWeapon(roomId: string, weaponId: string) {
   }
 
   return state;
+}
+
+export function startGameTimer(
+  roomId: string,
+  onTick: (state: GameState) => void,
+  onGameEnd: () => void,
+) {
+  gameIntervals.set(
+    roomId,
+    setInterval(() => {
+      const gameState = gameStates.get(roomId);
+      if (!gameState) {
+        return;
+      }
+
+      gameState.timeRemaining -= 1000;
+      onTick(gameState);
+
+      if (gameState.timeRemaining <= 0) {
+        clearInterval(gameIntervals.get(roomId));
+        gameIntervals.delete(roomId);
+
+        onGameEnd();
+      }
+    }, 1000),
+  );
 }

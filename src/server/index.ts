@@ -20,6 +20,7 @@ import {
   incrementY,
   addWeapon,
   removeWeapon,
+  startGameTimer,
 } from './game-state.ts';
 import type {
   AddWeaponRequestMessage,
@@ -121,11 +122,24 @@ websocketServer.on('connection', (socket) => {
 
     if (bothReady(room)) {
       startGame(parseInt(roomId, 10));
+
       addNewGameState(roomId, {
         player1: { x: 100, y: 100, health: 100 },
         player2: { x: 100, y: 200, health: 100 },
         weapons: [],
+        timeRemaining: 4 * 60 * 1000,
       });
+
+      startGameTimer(
+        roomId,
+        (state) => {
+          websocketServer.to(roomId).emit('gameStateUpdate', state);
+        },
+        () => {
+          websocketServer.to(roomId).emit('gameEnd');
+        },
+      );
+
       websocketServer.to(roomId).emit('gameStart');
     }
     // console.log('Current rooms:', room);

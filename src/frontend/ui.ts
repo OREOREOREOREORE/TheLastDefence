@@ -162,6 +162,7 @@ export function initializeUI() {
   });
 
   socket.on('gameStart', () => {
+    $('#time-remaining').text('04:00');
     $('#game-room-container').addClass('hidden').removeClass('flex');
     $('#game-container').removeClass('hidden');
 
