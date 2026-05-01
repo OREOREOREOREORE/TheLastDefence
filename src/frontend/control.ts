@@ -14,7 +14,6 @@ const OBSERVED_KEYS = [
   'd',
 ] as const;
 
-// $(() => {
 export function initializeControl(
   roomId: string,
   player: PlayerId,
@@ -78,4 +77,3 @@ export function initializeControl(
     });
   });
 }
-// });
