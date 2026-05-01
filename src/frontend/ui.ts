@@ -167,7 +167,19 @@ export function initializeUI() {
 
     import('./game.ts')
       .then(({ initializeGame }) => {
-        initializeGame();
+        if (!currentRoom) {
+          console.error('No current room found');
+          return;
+        }
+
+        const roomId = currentRoom.roomId.toString();
+        const playerId =
+          currentRoom.players[0]?.username ===
+          Authentication.getUser()?.username
+            ? 1
+            : 2;
+
+        initializeGame(roomId, playerId);
       })
       .catch((error: unknown) => {
         console.error('Error loading game module:', error);
