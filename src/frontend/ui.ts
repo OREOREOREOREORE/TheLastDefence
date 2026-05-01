@@ -199,6 +199,18 @@ export function initializeUI() {
     $('#login-form').removeClass('hidden').addClass('flex');
   });
 
+  $('#btn-about').on('click', (e) => {
+    e.preventDefault();
+    $('#start-menu').addClass('hidden').removeClass('flex');
+    $('#about-container').removeClass('hidden').addClass('flex');
+  });
+
+  $('#btn-back-to-start-menu').on('click', (e) => {
+    e.preventDefault();
+    $('#about-container').addClass('hidden').removeClass('flex');
+    $('#start-menu').removeClass('hidden').addClass('flex');
+  });
+
   Authentication.validate(
     () => {
       const user = Authentication.getUser();

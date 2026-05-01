@@ -81,6 +81,11 @@ a, a:visited  {
   margin-bottom: 10dvh;
 }
 
+#about-container {
+  gap: 8px;
+  margin-bottom: 20dvh;
+}
+
 #game-room-container {
   background: url('asset/game_room.png') no-repeat center/cover;
   width: 100vw;
