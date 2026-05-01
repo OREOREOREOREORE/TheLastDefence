@@ -2,9 +2,9 @@ import $ from 'jquery';
 import { initializeUI } from './ui';
 import sounds from './music';
 
-await Promise.all([
-  sounds.load('bg', 'src/frontend/sounds/Gold_Coin_Sprint.mp3'),
-]);
+import backgroundMusic from '../../asset/sounds/Gold_Coin_Sprint.mp3';
+
+await Promise.all([sounds.load('bg', backgroundMusic)]);
 
 $(() => {
   initializeUI();
