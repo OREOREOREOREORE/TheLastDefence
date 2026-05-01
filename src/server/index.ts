@@ -314,8 +314,6 @@ httpServer.listen(8000, () => {
 process.on('SIGINT', () => {
   console.log('Shutting down server...');
 
-  websocketServer.disconnectSockets();
-
   websocketServer
     .close()
     .then(() => {
