@@ -88,10 +88,15 @@
       </div>
       <div id="end-game-container" class="hidden flex-column">
         <h1 id="end-game-result">Results</h1>
-        <button id="end-game-restart" class="btn">Restart</button>
-        <button id="end-game-back-to-start-menu" class="btn">
-          Back to Start Menu
-        </button>
+        <p>Outcome: <span id="outcome">-</span></p>
+        <p>Hit rate: <span id="hit-rate">0.00%</span></p>
+        <p>Remaining health: <span id="remaining-health">100</span></p>
+        <div id="end-game-actions-container" class="flex">
+          <button id="end-game-restart" class="btn">Restart</button>
+          <button id="end-game-back-to-start-menu" class="btn">
+            Back to Start Menu
+          </button>
+        </div>
       </div>
     </div>
     <div id="game-room-container" class="hidden flex-column">
