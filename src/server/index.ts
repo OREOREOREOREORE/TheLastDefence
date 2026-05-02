@@ -115,15 +115,6 @@ websocketServer.on('connection', (socket) => {
     callback(room);
   });
 
-  // if (room.status === "full"){
-  //   websocketServer.to(roomIdStr).emit('roomFull', {
-  //     roomId: room.roomId,
-  //     players: [room.players[0]?.username, room.players[1]?.username],
-  //   });
-  // }else{
-  //   socket.emit('waiting', {roomId: room.roomId});
-  // }
-
   socket.on('ready', (roomId: string) => {
     const room = setReady(parseInt(roomId, 10), username);
     console.log(`Player ${username} is ready in room ${roomId}`);
@@ -135,8 +126,20 @@ websocketServer.on('connection', (socket) => {
       startGame(parseInt(roomId, 10));
 
       addNewGameState(roomId, {
-        player1: { x: 100, y: 100, health: 100 },
-        player2: { x: 100, y: 200, health: 100 },
+        player1: {
+          x: 100,
+          y: 100,
+          health: 100,
+          numberOfWeaponsUsed: 0,
+          numberOfKills: 0,
+        },
+        player2: {
+          x: 100,
+          y: 200,
+          health: 100,
+          numberOfWeaponsUsed: 0,
+          numberOfKills: 0,
+        },
         weapons: [],
         timeRemaining: 5 * 1000,
       });
@@ -146,8 +149,8 @@ websocketServer.on('connection', (socket) => {
         (state) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
-        () => {
-          websocketServer.to(roomId).emit('gameEnd', 'finished');
+        (state) => {
+          websocketServer.to(roomId).emit('gameEnd', 'finished', state);
           // One of the player leaving will automatically destroy the room
           leaveRoom(parseInt(roomId, 10), username);
         },
@@ -204,6 +207,7 @@ websocketServer.on('connection', (socket) => {
       data.createdAt,
       data.directionNormVector,
     );
+
     websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
   });
 
@@ -233,16 +237,6 @@ websocketServer.on('connection', (socket) => {
         break;
       }
     }
-    // Grace period so a refresh/reconnect by the same username keeps the room.
-    // setTimeout(() => {
-    //   const current = findRoomByUsername(username);
-    //   if (current?.roomId === room.roomId){
-    //     const slot =
-    //       current.player1?.username === username ? current.player1 :
-    //       current.player2?.username === username ? current.player2 : undefined;
-    //     if (slot && slot.socketId !== socket.id) return; // reconnected
-    //   }
-    // }, 3000);
   });
 });
 
