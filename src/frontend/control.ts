@@ -17,9 +17,9 @@ const OBSERVED_KEYS = [
 export function initializeControl(
   roomId: string,
   player: PlayerId,
-  app: Application
+  app: Application,
 ) {
-  $(document).on('keydown', (event) => {
+  $(document).on('keydown.game', (event) => {
     if (!OBSERVED_KEYS.includes(event.key as (typeof OBSERVED_KEYS)[number])) {
       return;
     }
@@ -43,7 +43,7 @@ export function initializeControl(
     }
   });
 
-  $(document).on('click', (event) => {
+  $(document).on('click.game', (event) => {
     const weaponId = `player${player}-${crypto.randomUUID()}`;
     const canvasRect = app.getCanvasRect();
 
@@ -72,8 +72,12 @@ export function initializeControl(
       player,
       weaponId,
       rotation,
-      createdAt: performance.now(),
+      createdAt: Date.now(),
       directionNormVector,
     });
   });
+}
+
+export function cleanupControl() {
+  $(document).off('.game');
 }

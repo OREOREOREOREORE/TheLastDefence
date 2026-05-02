@@ -1,5 +1,5 @@
 import { socket } from './socket';
-import { initializeControl } from './control';
+import { initializeControl, cleanupControl } from './control';
 
 import { Sprite } from '../engine/sprite';
 import { Application } from '../engine/application';
@@ -81,7 +81,11 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   app.onTick(() => {
     for (const weapon of localWeaponsState.values()) {
-      const timeElapsed = performance.now() - weapon.createdAt;
+      const timeElapsed = Math.max(Date.now() - weapon.createdAt, 0);
+      if (timeElapsed === 0) {
+        // The clock likely drifted backwards, skip this tick to avoid projectiles jumping forward.
+        continue;
+      }
       const distanceTraveled = timeElapsed * 0.5;
 
       const newX = weapon.x + weapon.directionNormVector.x * distanceTraveled;
@@ -164,4 +168,10 @@ export function initializeGame(roomId: string, player: PlayerId) {
   });
 
   app.initialize();
+
+  return () => {
+    socket.removeListener('gameStateUpdate');
+    cleanupControl();
+    app.destroy();
+  };
 }
