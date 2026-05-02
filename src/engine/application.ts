@@ -53,6 +53,8 @@ export class Application extends EventTarget {
 
   private ticker: Ticker;
 
+  private destroyed = false;
+
   /**
    * Creates a new application instance and prepares the ticker.
    *
@@ -156,6 +158,10 @@ export class Application extends EventTarget {
    * If the name already exists, the previous object is replaced.
    */
   public registerObject(name: string, object: BaseObject) {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     this.objects.set(name, object);
   }
 
@@ -163,6 +169,10 @@ export class Application extends EventTarget {
    * Deregisters an object by name.
    */
   public removeObject(name: string) {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     this.objects.delete(name);
   }
 
@@ -170,6 +180,10 @@ export class Application extends EventTarget {
    * Returns a previously registered object by name.
    */
   public getObject(name: string) {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     return this.objects.get(name);
   }
 
@@ -180,6 +194,10 @@ export class Application extends EventTarget {
    * Returns a cleanup function that removes the listener.
    */
   public onTick(listener: TickerListener) {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     return this.ticker.addListener(listener);
   }
 
@@ -188,22 +206,64 @@ export class Application extends EventTarget {
    * @returns The bounding rectangle of the canvas, or `undefined` if the canvas is not initialized.
    */
   public getCanvasRect() {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     return this.canvas?.getBoundingClientRect();
   }
 
   public saveContextState() {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     this.canvasContext?.save();
   }
 
   public restoreContextState() {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     this.canvasContext?.restore();
   }
 
   public getWidth() {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     return this.width;
   }
 
   public getHeight() {
+    if (this.destroyed) {
+      throw new Error('Application is destroyed');
+    }
+
     return this.height;
+  }
+
+  public destroy() {
+    if (this.destroyed) {
+      return;
+    }
+
+    this.destroyed = true;
+
+    this.ticker.stop();
+
+    if (this.canvas) {
+      this.canvas.removeEventListener(
+        'click',
+        this.canvasClickHandler.bind(this),
+      );
+      this.rootElement.removeChild(this.canvas);
+      this.canvas = null;
+      this.canvasContext = null;
+    }
+
+    this.objects.clear();
   }
 }
