@@ -44,19 +44,6 @@ function startGame(roomId: number): Room | null {
 }
 
 function findOrCreateRoom(player: Player): Room {
-  // Reconnect: same username already has a room → refresh socketId.
-  const existing = findRoomByUsername(player.username);
-  if (existing) {
-    for (const existingPlayer of existing.players) {
-      if (existingPlayer.username === player.username) {
-        existingPlayer.socketId = player.socketId;
-        return existing;
-      }
-    }
-
-    return existing;
-  }
-
   for (const room of rooms.values()) {
     if (room.status === 'waiting') {
       return joinRoom(room.roomId, player);
@@ -65,14 +52,6 @@ function findOrCreateRoom(player: Player): Room {
 
   const newRoomId = currentRoomId++;
   return createRoom(newRoomId, player);
-
-  // let room = waitingQueue.shift();
-  // if (room) {
-  //   joinRoom(room.roomId, player);
-  // } else {
-  //   const newRoomId = roomid++;
-  //   room = createRoom(newRoomId, player);
-  // }
 }
 
 function setReady(roomId: number, username: string): Room | null {
@@ -103,17 +82,20 @@ function bothReady(room: Room): boolean {
 
 function leaveRoom(roomId: number, username: string): void {
   const room = rooms.get(roomId);
-  console.log(`Player ${username} is leaving room ${roomId}`);
-  console.log(room);
   if (!room) return;
 
   // If the game is in progress, end it: drop the room entirely.
-  // if (room.status === 'playing') {
-  //   if (room.player1) usernameToRoomId.delete(room.player1.username);
-  //   if (room.player2) usernameToRoomId.delete(room.player2.username);
-  //   rooms.delete(roomId);
-  //   return;
-  // }
+  if (room.status === 'playing') {
+    if (room.players[0]) {
+      usernameToRoomId.delete(room.players[0].username);
+    }
+    if (room.players[1]) {
+      usernameToRoomId.delete(room.players[1].username);
+    }
+    rooms.delete(roomId);
+
+    return;
+  }
 
   for (const player of room.players) {
     if (player.username === username) {
