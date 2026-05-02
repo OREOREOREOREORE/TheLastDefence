@@ -5,6 +5,8 @@ interface BaseState {
 
 export interface PlayerState extends BaseState {
   health: number;
+  numberOfWeaponsUsed: number;
+  numberOfKills: number;
 }
 
 export interface WeaponState extends BaseState {

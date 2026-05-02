@@ -4,6 +4,7 @@ import { Authentication } from './auth.ts';
 
 import type { Room } from '../common/game-room';
 import type { Player } from '../common/game-room';
+import type { GameState } from '../common/game-state';
 
 // type Screen = 'login' | 'start-menu' | 'game-room' | 'gaming';
 
@@ -76,14 +77,37 @@ export function initializeUI() {
       });
   });
 
-  socket.on('gameEnd', (reason: string) => {
+  socket.on('gameEnd', (reason: string, gameState?: GameState) => {
     appDestroyCallback?.();
     $('#game-container').addClass('hidden');
-    if (reason === 'finished') {
+
+    const currentUsername = Authentication.getUser()?.username ?? '';
+
+    if (reason === 'finished' || reason === 'gameOver') {
       // The last page open should be the start menu
       $('#start-menu').removeClass('flex').addClass('hidden');
       $('#end-game-container').removeClass('hidden').addClass('flex');
       $('#home-container').removeClass('hidden').addClass('flex');
+
+      if (gameState) {
+        const playerState =
+          currentRoom?.players[0]?.username === currentUsername
+            ? gameState.player1
+            : gameState.player2;
+        const isFailed = reason === 'gameOver';
+        const outcome = isFailed ? 'Mission Failed' : 'Mission Accomplished';
+        const hitRate =
+          playerState.numberOfWeaponsUsed > 0
+            ? (playerState.numberOfKills / playerState.numberOfWeaponsUsed) *
+              100
+            : 0;
+
+        $('#outcome')
+          .text(outcome)
+          .css('color', isFailed ? 'crimson' : '#01ff01');
+        $('#hit-rate').text(`${hitRate.toFixed(2)}%`);
+        $('#remaining-health').text(playerState.health.toString());
+      }
 
       return;
     }

@@ -85,6 +85,8 @@ export function addWeapon(
       createdAt,
       directionNormVector,
     });
+
+    playerState.numberOfWeaponsUsed += 1;
   }
 
   return state;
@@ -102,7 +104,7 @@ export function removeWeapon(roomId: string, weaponId: string) {
 export function startGameTimer(
   roomId: string,
   onTick: (state: GameState) => void,
-  onGameEnd: () => void,
+  onGameEnd: (state: GameState) => void,
 ) {
   gameIntervals.set(
     roomId,
@@ -119,7 +121,7 @@ export function startGameTimer(
         clearInterval(gameIntervals.get(roomId));
         gameIntervals.delete(roomId);
 
-        onGameEnd();
+        onGameEnd(gameState);
       }
     }, 1000),
   );
