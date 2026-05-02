@@ -34,13 +34,13 @@ function generatePlayerLabel(
 }
 
 export function initializeUI() {
+  let appDestroyCallback: (() => void) | null = null;
+
   socket.on('roomUpdate', (room: Room) => {
     currentRoom = room;
 
     // Should not be null at this point, but just in case
     const currentUsername = Authentication.getUser()?.username ?? '';
-
-    console.log('Received roomUpdate for room', room);
 
     $('#player1-label').text(
       generatePlayerLabel(room.players[0], currentUsername),
@@ -69,11 +69,27 @@ export function initializeUI() {
             ? 1
             : 2;
 
-        initializeGame(roomId, playerId);
+        appDestroyCallback = initializeGame(roomId, playerId);
       })
       .catch((error: unknown) => {
         console.error('Error loading game module:', error);
       });
+  });
+
+  socket.on('gameEnd', (reason: string) => {
+    appDestroyCallback?.();
+    $('#game-container').addClass('hidden');
+    if (reason === 'finished') {
+      // The last page open should be the start menu
+      $('#start-menu').removeClass('flex').addClass('hidden');
+      $('#end-game-container').removeClass('hidden').addClass('flex');
+      $('#home-container').removeClass('hidden').addClass('flex');
+
+      return;
+    }
+
+    alert(`Game ended due to unexpected reason: ${reason}`);
+    $('#home-container').removeClass('hidden').addClass('flex');
   });
 
   const messageElements = $('.message');
@@ -149,8 +165,10 @@ export function initializeUI() {
     );
   });
 
-  $('#btn-start').on('click', (e) => {
+  $('#btn-start, #end-game-restart').on('click', (e) => {
     e.preventDefault();
+    $('#start-menu').addClass('hidden').removeClass('flex');
+    $('#end-game-container').addClass('hidden').removeClass('flex');
     $('#home-container').addClass('hidden').removeClass('flex');
     $('#game-room-container').removeClass('hidden').addClass('flex');
     socket.emit('start', null, (room: Room) => {
@@ -178,6 +196,7 @@ export function initializeUI() {
 
   $('#leave-room-button').on('click', (e) => {
     e.preventDefault();
+    $('#start-menu').removeClass('hidden').addClass('flex');
     $('#home-container').removeClass('hidden').addClass('flex');
     $('#game-room-container').addClass('hidden').removeClass('flex');
     socket.emit('leaveRoom', currentRoom?.roomId.toString(), () => {
@@ -205,9 +224,15 @@ export function initializeUI() {
     $('#about-container').removeClass('hidden').addClass('flex');
   });
 
-  $('#btn-back-to-start-menu').on('click', (e) => {
+  $('#about-back-to-start-menu').on('click', (e) => {
     e.preventDefault();
     $('#about-container').addClass('hidden').removeClass('flex');
+    $('#start-menu').removeClass('hidden').addClass('flex');
+  });
+
+  $('#end-game-back-to-start-menu').on('click', (e) => {
+    e.preventDefault();
+    $('#end-game-container').addClass('hidden').removeClass('flex');
     $('#start-menu').removeClass('hidden').addClass('flex');
   });
 
