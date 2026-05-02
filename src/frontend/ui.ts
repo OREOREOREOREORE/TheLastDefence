@@ -4,7 +4,7 @@ import { Authentication } from './auth.ts';
 
 import type { Room } from '../common/game-room';
 import type { Player } from '../common/game-room';
-import type { GameState } from '../common/game-state';
+import type { GameRecord } from '../common/game-record';
 
 // type Screen = 'login' | 'start-menu' | 'game-room' | 'gaming';
 
@@ -77,44 +77,82 @@ export function initializeUI() {
       });
   });
 
-  socket.on('gameEnd', (reason: string, gameState?: GameState) => {
-    appDestroyCallback?.();
-    $('#game-container').addClass('hidden');
+  socket.on(
+    'gameEnd',
+    (
+      reason: string,
+      statistics?: Record<
+        string,
+        Pick<GameRecord, 'hitRate' | 'remainingHealth'>
+      >,
+      records?: GameRecord[],
+      newRecordIds?: [number, number],
+    ) => {
+      appDestroyCallback?.();
+      $('#game-container').addClass('hidden');
 
-    const currentUsername = Authentication.getUser()?.username ?? '';
+      const currentUsername = Authentication.getUser()?.username ?? '';
 
-    if (reason === 'finished' || reason === 'gameOver') {
-      // The last page open should be the start menu
-      $('#start-menu').removeClass('flex').addClass('hidden');
-      $('#end-game-container').removeClass('hidden').addClass('flex');
-      $('#home-container').removeClass('hidden').addClass('flex');
+      if (reason === 'finished' || reason === 'gameOver') {
+        // The last page open should be the start menu
+        $('#start-menu').removeClass('flex').addClass('hidden');
+        $('#end-game-container').removeClass('hidden').addClass('flex');
+        $('#home-container').removeClass('hidden').addClass('flex');
 
-      if (gameState) {
-        const playerState =
-          currentRoom?.players[0]?.username === currentUsername
-            ? gameState.player1
-            : gameState.player2;
-        const isFailed = reason === 'gameOver';
-        const outcome = isFailed ? 'Mission Failed' : 'Mission Accomplished';
-        const hitRate =
-          playerState.numberOfWeaponsUsed > 0
-            ? (playerState.numberOfKills / playerState.numberOfWeaponsUsed) *
-              100
-            : 0;
+        if (statistics && records) {
+          const isFailed = reason === 'gameOver';
+          const outcome = isFailed ? 'Mission Failed' : 'Mission Accomplished';
 
-        $('#outcome')
-          .text(outcome)
-          .css('color', isFailed ? 'crimson' : '#01ff01');
-        $('#hit-rate').text(`${hitRate.toFixed(2)}%`);
-        $('#remaining-health').text(playerState.health.toString());
+          const partnerUsername =
+            Object.keys(statistics).find((u) => u !== currentUsername) ?? '';
+
+          const hitRate = statistics[currentUsername].hitRate;
+          const partnerHitRate = statistics[partnerUsername].hitRate;
+          const remainingHealth = statistics[currentUsername].remainingHealth;
+          const partnerRemainingHealth =
+            statistics[partnerUsername].remainingHealth;
+
+          $('#outcome')
+            .text(outcome)
+            .css('color', isFailed ? 'crimson' : '#01ff01');
+          $('#your-hit-rate').text(`${hitRate.toFixed(2)}%`);
+          $('#your-remaining-health').text(remainingHealth.toString());
+          $('#your-partner-hit-rate').text(`${partnerHitRate.toFixed(2)}%`);
+          $('#your-partner-remaining-health').text(
+            partnerRemainingHealth.toString(),
+          );
+
+          $('#ranks-table-body').empty();
+          for (let i = 0; i < records.length; i++) {
+            const record = records[i];
+            const isNewRecord = newRecordIds?.includes(record.id) ?? false;
+
+            const row = $('<tr></tr>')
+              .append(`<td>${i + 1}</td>`)
+              .append(`<td>${record.username}</td>`)
+              .append(`<td>${record.hitRate.toFixed(2)}%</td>`)
+              .append(`<td>${record.remainingHealth}</td>`)
+              .append(
+                `<td>${new Date(`${record.timestamp}Z`).toLocaleString()}</td>`,
+              );
+
+            if (isNewRecord) {
+              row.addClass('new');
+            }
+
+            $('#ranks-table-body').append(row);
+          }
+
+          console.log('Game records:', records, newRecordIds);
+        }
+
+        return;
       }
 
-      return;
-    }
-
-    alert(`Game ended due to unexpected reason: ${reason}`);
-    $('#home-container').removeClass('hidden').addClass('flex');
-  });
+      alert(`Game ended due to unexpected reason: ${reason}`);
+      $('#home-container').removeClass('hidden').addClass('flex');
+    },
+  );
 
   const messageElements = $('.message');
 

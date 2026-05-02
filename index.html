@@ -87,10 +87,35 @@
         </button>
       </div>
       <div id="end-game-container" class="hidden flex-column">
-        <h1 id="end-game-result">Results</h1>
+        <h1>Results</h1>
         <p>Outcome: <span id="outcome">-</span></p>
-        <p>Hit rate: <span id="hit-rate">0.00%</span></p>
-        <p>Remaining health: <span id="remaining-health">100</span></p>
+        <p>Your Hit rate: <span id="your-hit-rate">0.00%</span></p>
+        <p>
+          Your Remaining health: <span id="your-remaining-health">100</span>
+        </p>
+        <p>
+          Your Partner's Hit rate: <span id="your-partner-hit-rate">0.00%</span>
+        </p>
+        <p>
+          Your Partner's Remaining health:
+          <span id="your-partner-remaining-health">100</span>
+        </p>
+        <h1>Ranks</h1>
+        <div id="ranks-table-container">
+          <table id="ranks-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Username</th>
+                <th>Hit Rate</th>
+                <th>Remaining Health</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="ranks-table-body"></tbody>
+          </table>
+        </div>
+        <p>New records are in green</p>
         <div id="end-game-actions-container" class="flex">
           <button id="end-game-restart" class="btn">Restart</button>
           <button id="end-game-back-to-start-menu" class="btn">

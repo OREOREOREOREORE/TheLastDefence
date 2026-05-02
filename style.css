@@ -163,6 +163,22 @@ h1 {
   max-width: 300px;
 }
 
+#ranks-table-container {
+  overflow: auto;
+}
+
+#ranks-table {
+  text-align: left;
+}
+
+#ranks-table :is(th, td) {
+  padding: 8px 0;
+}
+
+#ranks-table tr.new {
+  color: #01ff01;
+}
+
 .message {
   color: crimson;
 }
