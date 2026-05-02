@@ -14,7 +14,9 @@
   </head>
   <body>
     <div id="game-container" class="hidden">
-      <p id="time-remaining-label">Time Remaining: <span id="time-remaining"></span></p>
+      <p id="time-remaining-label">
+        Time Remaining: <span id="time-remaining"></span>
+      </p>
     </div>
     <div id="home-container" class="flex flex-column">
       <form id="login-form" class="form flex flex-column" autocomplete="off">
@@ -35,11 +37,17 @@
         />
         <button type="submit" id="login-btn" class="btn">Let's start</button>
         <div>
-          <p>Don't have an account? <a href="#" id="register-link">register</a></p>
+          <p>
+            Don't have an account? <a href="#" id="register-link">register</a>
+          </p>
         </div>
         <p class="message"></p>
       </form>
-      <form id="register-form" class="form hidden flex-column" autocomplete="off">
+      <form
+        id="register-form"
+        class="form hidden flex-column"
+        autocomplete="off"
+      >
         <h1>Registration</h1>
         <input
           type="text"
@@ -74,18 +82,35 @@
       <div id="about-container" class="hidden flex-column">
         <h1>About & How to play</h1>
         <p>Something...</p>
-        <button id="btn-back-to-start-menu" class="btn">Back to Start Menu</button>
+        <button id="about-back-to-start-menu" class="btn">
+          Back to Start Menu
+        </button>
+      </div>
+      <div id="end-game-container" class="hidden flex-column">
+        <h1 id="end-game-result">Results</h1>
+        <button id="end-game-restart" class="btn">Restart</button>
+        <button id="end-game-back-to-start-menu" class="btn">
+          Back to Start Menu
+        </button>
       </div>
     </div>
     <div id="game-room-container" class="hidden flex-column">
       <p id="room-number-text">Room <span id="room-number">#</span></p>
       <div id="players-container" class="flex">
         <div class="player-info flex flex-column">
-          <img src="asset/player1-avatar.png" alt="player1" class="player-avatar">
+          <img
+            src="asset/player1-avatar.png"
+            alt="player1"
+            class="player-avatar"
+          />
           <label id="player1-label"></label>
         </div>
         <div class="player-info flex flex-column">
-          <img src="asset/player2-avatar.png" alt="player2" class="player-avatar">
+          <img
+            src="asset/player2-avatar.png"
+            alt="player2"
+            class="player-avatar"
+          />
           <label id="player2-label"></label>
         </div>
       </div>
