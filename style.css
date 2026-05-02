@@ -169,6 +169,7 @@ h1 {
 
 #ranks-table {
   text-align: left;
+  width: 100%;
 }
 
 #ranks-table :is(th, td) {
