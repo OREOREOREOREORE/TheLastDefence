@@ -32,6 +32,7 @@ export const Authentication = (function () {
       })
       .catch((err: unknown) => {
         console.error(err);
+        onError('An error occurred during sign in. Please try again.');
       });
   };
 
@@ -58,6 +59,7 @@ export const Authentication = (function () {
       })
       .catch((err: unknown) => {
         console.error(err);
+        onError('An error occurred during sign up. Please try again.');
       });
   };
 
@@ -76,6 +78,7 @@ export const Authentication = (function () {
       })
       .catch((err: unknown) => {
         console.error(err);
+        onError('An error occurred during sign out. Please try again.');
       });
   };
 
@@ -94,6 +97,7 @@ export const Authentication = (function () {
       })
       .catch((err: unknown) => {
         console.error(err);
+        onError('An error occurred during validation. Please try again.');
       });
   };
 
