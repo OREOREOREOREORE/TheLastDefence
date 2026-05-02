@@ -1,19 +1,23 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-body{
-    display: flex;
-    align-items: center;
-    min-height: 100vh;
-    font-family: 'Montserrat', sans-serif;
-    color: #fff;
+body {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
 }
 
 a, a:visited  {
   color: #fff;
+}
+
+h1 {
+  font-weight: 500;
 }
 
 .hidden {
@@ -50,7 +54,6 @@ a, a:visited  {
 }
 
 .form h1 {
-  font-weight: 500;
   margin-bottom: 8px;
 }
 
@@ -67,7 +70,7 @@ a, a:visited  {
   cursor: pointer;
 }
 
-#home-container, #end-game-container {
+#home-container {
   background: url('asset/background.png') no-repeat center/cover;
   width: 100vw;
   height: 100vh;
@@ -140,9 +143,9 @@ a, a:visited  {
 }
 
 #end-game-container {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px); 
+  padding: 24px 20px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px); 
   gap: 16px;
   width: 80vw;
   height: 80dvh;
@@ -150,7 +153,13 @@ a, a:visited  {
   margin-bottom: 10dvh;
 }
 
-#end-game-container .btn {
+#end-game-actions-container {
+  gap: 8px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+#end-game-actions-container .btn {
   max-width: 300px;
 }
 
