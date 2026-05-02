@@ -1,16 +1,18 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
-import fs from 'node:fs';
+// import fs from 'node:fs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
 import argon2 from 'argon2';
 
 import process from 'node:process';
-import type { Request } from 'express';
+
 
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
+
+
 
 import {
   addNewGameState,
@@ -23,11 +25,7 @@ import {
   startGameTimer,
   stopGameTimer,
 } from './game-state.ts';
-import type {
-  AddWeaponRequestMessage,
-  GameStateUpdateRequestMessage,
-  RemoveWeaponRequestMessage,
-} from '../common/game-state.ts';
+
 import {
   rooms,
   bothReady,
@@ -36,8 +34,16 @@ import {
   setReady,
   startGame,
 } from './game-room.ts';
+import { addUser, getUser, addGameRecord, getGameRecords } from './db.ts';
 
 import type { Room } from '../common/game-room.d.ts';
+import type { Request } from 'express';
+import type {
+  AddWeaponRequestMessage,
+  GameStateUpdateRequestMessage,
+  RemoveWeaponRequestMessage,
+  PlayerState,
+} from '../common/game-state.ts';
 
 interface Cookies {
   auth_token?: string;
@@ -60,7 +66,7 @@ type LoginRequest = Request<
   }
 >;
 
-type User = Record<string, { password: string }>;
+// type User = Record<string, { password: string }>;
 
 const app = express();
 const httpServer = createServer(app);
@@ -77,6 +83,14 @@ ViteExpress.config({
 });
 
 app.get('/message', (_, res) => res.send('Hello from express!'));
+
+function computeHitRate(playerState: PlayerState): number {
+  if (playerState.numberOfWeaponsUsed === 0) {
+    return 0;
+  }
+
+  return (playerState.numberOfKills / playerState.numberOfWeaponsUsed) * 100;
+}
 
 websocketServer.on('connection', (socket) => {
   const username = (socket.handshake.auth as { username?: string }).username;
@@ -129,7 +143,7 @@ websocketServer.on('connection', (socket) => {
         player1: {
           x: 100,
           y: 100,
-          health: 100,
+          health: 90,
           numberOfWeaponsUsed: 0,
           numberOfKills: 0,
         },
@@ -150,7 +164,53 @@ websocketServer.on('connection', (socket) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
         (state) => {
-          websocketServer.to(roomId).emit('gameEnd', 'finished', state);
+          const currentRoom = rooms.get(parseInt(roomId, 10));
+
+          const player1Username =
+            currentRoom?.players[0]?.username ?? 'Unknown';
+          const player2Username =
+            currentRoom?.players[1]?.username ?? 'Unknown';
+
+          const player1HitRate = computeHitRate(state.player1);
+          const player2HitRate = computeHitRate(state.player2);
+
+          const player1RemainingHealth = state.player1.health;
+          const player2RemainingHealth = state.player2.health;
+
+          const newRecordIds = [];
+
+          newRecordIds.push(
+            addGameRecord(
+              player1Username,
+              false,
+              player1HitRate,
+              player1RemainingHealth,
+            )
+          );
+
+          newRecordIds.push(addGameRecord(
+            player2Username,
+            false,
+            player2HitRate,
+            player2RemainingHealth,
+          ));
+
+          websocketServer.to(roomId).emit(
+            'gameEnd',
+            'finished',
+            {
+              [player1Username]: {
+                hitRate: player1HitRate,
+                remainingHealth: player1RemainingHealth,
+              },
+              [player2Username]: {
+                hitRate: player2HitRate,
+                remainingHealth: player2RemainingHealth,
+              },
+            },
+            getGameRecords(),
+            newRecordIds
+          );
           // One of the player leaving will automatically destroy the room
           leaveRoom(parseInt(roomId, 10), username);
         },
@@ -249,16 +309,18 @@ function containWordCharsOnly(text: string) {
 app.post('/login', async (req: LoginRequest, res) => {
   const { username, password } = req.body;
 
-  const users = JSON.parse(
-    fs.readFileSync('data/users.json', 'utf-8'),
-  ) as Record<string, { password: string }>;
+  // const users = JSON.parse(
+  //   fs.readFileSync('data/users.json', 'utf-8'),
+  // ) as Record<string, { password: string }>;
+  const user = getUser(username);
 
-  if (!(username in users)) {
+  // if (!(username in users)) {
+  if (!user) {
     res.json({ error: 'username not registered' });
     return;
   }
 
-  const user = users[username];
+  // const user = users[username];
 
   const verified = await argon2.verify(user.password, password);
 
@@ -298,7 +360,7 @@ app.get('/signout', (_, res) => {
 app.post('/register', async (req: LoginRequest, res) => {
   const { username, password } = req.body;
 
-  const users = JSON.parse(fs.readFileSync('data/users.json', 'utf-8')) as User;
+  // const users = JSON.parse(fs.readFileSync('data/users.json', 'utf-8')) as User;
   // console.log(req.body);
   // console.log(users);
   // console.log(username, password)
@@ -313,18 +375,23 @@ app.post('/register', async (req: LoginRequest, res) => {
     });
     return;
   }
-  if (username in users) {
+
+  const existingUser = getUser(username);
+
+  // if (username in users) {
+  if (existingUser) {
     res.json({ error: 'username has already been used.' });
     return;
   }
 
   const hashed = await argon2.hash(password);
 
-  users[username] = {
-    password: hashed,
-  };
+  // users[username] = {
+  //   password: hashed,
+  // };
+  addUser(username, hashed);
 
-  fs.writeFileSync('data/users.json', JSON.stringify(users, null, 2));
+  // fs.writeFileSync('data/users.json', JSON.stringify(users, null, 2));
 
   res.json({ success: true });
 });
