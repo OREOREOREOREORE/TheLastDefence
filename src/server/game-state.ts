@@ -124,3 +124,8 @@ export function startGameTimer(
     }, 1000),
   );
 }
+
+export function stopGameTimer(roomId: string) {
+  clearInterval(gameIntervals.get(roomId));
+  gameIntervals.delete(roomId);
+}

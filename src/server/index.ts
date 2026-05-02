@@ -21,6 +21,7 @@ import {
   addWeapon,
   removeWeapon,
   startGameTimer,
+  stopGameTimer,
 } from './game-state.ts';
 import type {
   AddWeaponRequestMessage,
@@ -87,10 +88,20 @@ websocketServer.on('connection', (socket) => {
   console.log('A client connected:', socket.id, username);
   const player = { socketId: socket.id, username, ready: false };
   socket.on('start', async (_, callback: (room: Room) => void) => {
+    // Ensure the player is not ready if the player restarts the game
+    player.ready = false;
+
     const room = findOrCreateRoom(player);
     const roomIdStr = room.roomId.toString();
-    console.log('Player', username, 'is trying to join room', roomIdStr);
     await socket.join(roomIdStr);
+
+    console.log(
+      'Player',
+      username,
+      'is trying to join room',
+      roomIdStr,
+      JSON.stringify(room),
+    );
 
     websocketServer.to(roomIdStr).emit('roomUpdate', room);
 
@@ -100,7 +111,7 @@ websocketServer.on('connection', (socket) => {
       'players:',
       room.players.map((p) => p.username),
     );
-    // socket.emit('roomJoined', roomIdStr);
+
     callback(room);
   });
 
@@ -127,7 +138,7 @@ websocketServer.on('connection', (socket) => {
         player1: { x: 100, y: 100, health: 100 },
         player2: { x: 100, y: 200, health: 100 },
         weapons: [],
-        timeRemaining: 4 * 60 * 1000,
+        timeRemaining: 5 * 1000,
       });
 
       startGameTimer(
@@ -136,7 +147,9 @@ websocketServer.on('connection', (socket) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
         () => {
-          websocketServer.to(roomId).emit('gameEnd');
+          websocketServer.to(roomId).emit('gameEnd', 'finished');
+          // One of the player leaving will automatically destroy the room
+          leaveRoom(parseInt(roomId, 10), username);
         },
       );
 
@@ -150,6 +163,11 @@ websocketServer.on('connection', (socket) => {
     await socket.leave(roomId);
 
     const room = rooms.get(parseInt(roomId, 10));
+    if (room?.status === 'playing') {
+      websocketServer.to(roomId).emit('gameEnd', 'leave');
+      stopGameTimer(roomId);
+    }
+
     if (room) {
       websocketServer.to(roomId).emit('roomUpdate', room);
     }
@@ -201,7 +219,18 @@ websocketServer.on('connection', (socket) => {
         console.log(
           `Player ${username} was in room ${room.roomId}, processing leaveRoom...`,
         );
+
+        if (room.status === 'playing') {
+          websocketServer
+            .to(room.roomId.toString())
+            .emit('gameEnd', 'disconnect');
+          stopGameTimer(room.roomId.toString());
+        }
+
         leaveRoom(room.roomId, username);
+        websocketServer.to(room.roomId.toString()).emit('roomUpdate', room);
+
+        break;
       }
     }
     // Grace period so a refresh/reconnect by the same username keeps the room.
