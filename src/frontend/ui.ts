@@ -52,7 +52,6 @@ export function initializeUI() {
   });
 
   socket.on('gameStart', () => {
-    $('#time-remaining').text('04:00');
     $('#game-room-container').addClass('hidden').removeClass('flex');
     $('#game-container').removeClass('hidden');
 
@@ -150,6 +149,7 @@ export function initializeUI() {
       }
 
       alert(`Game ended due to unexpected reason: ${reason}`);
+      $('#start-menu').removeClass('hidden').addClass('flex');
       $('#home-container').removeClass('hidden').addClass('flex');
     },
   );
