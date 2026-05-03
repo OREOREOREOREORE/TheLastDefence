@@ -65,6 +65,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
   const timeRemainingElement = $('#time-remaining');
   const healthElement = $('#health');
   const partnerHealthElement = $('#partner-health');
+  const cheatModeIndicatorElement = $('#cheat-mode');
 
   let deadSFXPlayedForPlayer1 = false;
   let deadSFXPlayedForPlayer2 = false;
@@ -229,11 +230,21 @@ export function initializeGame(roomId: string, player: PlayerId) {
       player === 1 ? newState.player2.health : newState.player1.health;
 
     healthElement
-      .text(playerHealth)
+      .text(
+        `${playerHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+      )
       .css('color', playerHealth <= 20 ? 'crimson' : 'white');
     partnerHealthElement
-      .text(partnerHealth)
+      .text(
+        `${partnerHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+      )
       .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
+
+    if (newState.isCheatModeActivated) {
+      cheatModeIndicatorElement.removeClass('hidden');
+    } else {
+      cheatModeIndicatorElement.addClass('hidden');
+    }
   });
 
   app.initialize();

@@ -26,6 +26,7 @@ import {
   stopGameTimer,
   addHealth,
   damagePlayer,
+  toggleCheatMode,
 } from './game-state.ts';
 
 import {
@@ -162,6 +163,7 @@ websocketServer.on('connection', (socket) => {
         },
         weapons: [],
         timeRemaining: 60 * 1000,
+        isCheatModeActivated: false,
       });
 
       startGameTimer(
@@ -293,6 +295,11 @@ websocketServer.on('connection', (socket) => {
       const newState = removeWeapon(data.roomId, data.weaponId);
       websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
     }
+  });
+
+  socket.on('toggleCheatMode', (data: { roomId: string }) => {
+    const newState = toggleCheatMode(data.roomId);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
   });
 
   socket.on('disconnect', () => {

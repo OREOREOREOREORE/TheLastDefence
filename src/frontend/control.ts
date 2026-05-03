@@ -17,6 +17,7 @@ const OBSERVED_KEYS = [
   's',
   'd',
   'h',
+  'C',
 ] as const;
 
 export function initializeControl(
@@ -63,6 +64,10 @@ export function initializeControl(
       } else {
         console.log('No collision detected for health pickup.');
       }
+    }
+
+    if (event.key === 'C') {
+      socket.emit('toggleCheatMode', { roomId });
     }
   });
 
