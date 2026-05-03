@@ -97,6 +97,57 @@ function computeHitRate(playerState: PlayerState): number {
   return (playerState.numberOfKills / playerState.numberOfWeaponsUsed) * 100;
 }
 
+function computeAndAddEndGameResult(
+  roomId: string,
+  player1State: PlayerState,
+  player2State: PlayerState,
+) {
+  const currentRoom = rooms.get(parseInt(roomId, 10));
+
+  const player1Username = currentRoom?.players[0]?.username ?? 'Unknown';
+  const player2Username = currentRoom?.players[1]?.username ?? 'Unknown';
+
+  const player1HitRate = computeHitRate(player1State);
+  const player2HitRate = computeHitRate(player2State);
+
+  const player1RemainingHealth = player1State.health;
+  const player2RemainingHealth = player2State.health;
+
+  const newRecordIds = [];
+
+  newRecordIds.push(
+    addGameRecord(
+      player1Username,
+      false,
+      player1HitRate,
+      player1RemainingHealth,
+    ),
+  );
+
+  newRecordIds.push(
+    addGameRecord(
+      player2Username,
+      false,
+      player2HitRate,
+      player2RemainingHealth,
+    ),
+  );
+
+  return [
+    {
+      [player1Username]: {
+        hitRate: player1HitRate,
+        remainingHealth: player1RemainingHealth,
+      },
+      [player2Username]: {
+        hitRate: player2HitRate,
+        remainingHealth: player2RemainingHealth,
+      },
+    },
+    newRecordIds,
+  ];
+}
+
 websocketServer.on('connection', (socket) => {
   const username = (socket.handshake.auth as { username?: string }).username;
   if (!username) {
@@ -162,7 +213,7 @@ websocketServer.on('connection', (socket) => {
           direction: 'forward',
         },
         weapons: [],
-        timeRemaining: 60 * 1000,
+        timeRemaining: 5 * 1000,
         isCheatModeActivated: false,
       });
 
@@ -172,53 +223,21 @@ websocketServer.on('connection', (socket) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
         (state) => {
-          const currentRoom = rooms.get(parseInt(roomId, 10));
-
-          const player1Username =
-            currentRoom?.players[0]?.username ?? 'Unknown';
-          const player2Username =
-            currentRoom?.players[1]?.username ?? 'Unknown';
-
-          const player1HitRate = computeHitRate(state.player1);
-          const player2HitRate = computeHitRate(state.player2);
-
-          const player1RemainingHealth = state.player1.health;
-          const player2RemainingHealth = state.player2.health;
-
-          const newRecordIds = [];
-
-          newRecordIds.push(
-            addGameRecord(
-              player1Username,
-              false,
-              player1HitRate,
-              player1RemainingHealth,
-            )
+          const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
+            roomId,
+            state.player1,
+            state.player2,
           );
 
-          newRecordIds.push(addGameRecord(
-            player2Username,
-            false,
-            player2HitRate,
-            player2RemainingHealth,
-          ));
-
-          websocketServer.to(roomId).emit(
-            'gameEnd',
-            'finished',
-            {
-              [player1Username]: {
-                hitRate: player1HitRate,
-                remainingHealth: player1RemainingHealth,
-              },
-              [player2Username]: {
-                hitRate: player2HitRate,
-                remainingHealth: player2RemainingHealth,
-              },
-            },
-            getGameRecords(),
-            newRecordIds
-          );
+          websocketServer
+            .to(roomId)
+            .emit(
+              'gameEnd',
+              'finished',
+              endGameResult,
+              getGameRecords(),
+              newRecordIds,
+            );
           // One of the player leaving will automatically destroy the room
           leaveRoom(parseInt(roomId, 10), username);
         },
@@ -294,6 +313,25 @@ websocketServer.on('connection', (socket) => {
       damagePlayer(data.roomId, data.targetId as PlayerId);
       const newState = removeWeapon(data.roomId, data.weaponId);
       websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+
+      if (newState?.player1.health === 0 && newState.player2.health === 0) {
+        stopGameTimer(data.roomId);
+
+        const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
+          data.roomId,
+          newState.player1,
+          newState.player2,
+        );
+        websocketServer
+          .to(data.roomId)
+          .emit(
+            'gameEnd',
+            'gameOver',
+            endGameResult,
+            getGameRecords(),
+            newRecordIds,
+          );
+      }
     }
   });
 
