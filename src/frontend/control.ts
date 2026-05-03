@@ -1,7 +1,11 @@
 import $ from 'jquery';
 import { socket } from './socket';
+
+import sounds from './music';
+
 import type { PlayerId } from '../common/game-state';
 import type { Application } from '../engine/application';
+import type { Sprite } from '../engine/sprite';
 
 const OBSERVED_KEYS = [
   'ArrowUp',
@@ -12,6 +16,7 @@ const OBSERVED_KEYS = [
   'a',
   's',
   'd',
+  'h',
 ] as const;
 
 export function initializeControl(
@@ -40,6 +45,24 @@ export function initializeControl(
 
     if (event.key === 'ArrowRight' || event.key === 'd') {
       socket.emit('incrementX', { roomId, player });
+    }
+
+    if (event.key === 'h') {
+      const currentPlayer = `player${player}`;
+      const targetPlayer = `player${player === 1 ? 2 : 1}`;
+
+      console.log('Checking collision for health pickup...');
+
+      if (
+        (app.getObject(currentPlayer) as Sprite).collidesWith(
+          app.getObject(targetPlayer) as Sprite,
+        )
+      ) {
+        socket.emit('addHealth', { roomId, player });
+        sounds.playSfx('addHealth', 0.5);
+      } else {
+        console.log('No collision detected for health pickup.');
+      }
     }
   });
 

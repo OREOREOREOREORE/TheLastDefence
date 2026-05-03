@@ -7,6 +7,7 @@ export interface PlayerState extends BaseState {
   health: number;
   numberOfWeaponsUsed: number;
   numberOfKills: number;
+  direction: 'forward' | 'backward' | 'left' | 'right';
 }
 
 export interface WeaponState extends BaseState {
@@ -37,5 +38,14 @@ export interface AddWeaponRequestMessage extends GameStateUpdateRequestMessage {
 }
 
 export interface RemoveWeaponRequestMessage extends GameStateUpdateRequestMessage {
+  weaponId: string;
+}
+
+export interface WeaponHitMessage<
+  T extends 'player' | 'monster',
+> extends GameStateUpdateRequestMessage {
+  roomId: string;
+  targetType: T;
+  targetId: T extends 'player' ? PlayerId : string;
   weaponId: string;
 }

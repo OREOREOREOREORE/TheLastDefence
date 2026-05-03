@@ -4,15 +4,19 @@ import sounds from './music';
 
 import backgroundMusic from '../../asset/sounds/Gold_Coin_Sprint.mp3';
 import arrowSFX from '../../asset/sounds/arrow.wav';
+import addHealthSFX from '../../asset/sounds/add-health.wav';
+import deadSFX from '../../asset/sounds/dead.wav';
 
 await Promise.all([
   sounds.load('bg', backgroundMusic),
   sounds.load('shoot', arrowSFX),
+  sounds.load('addHealth', addHealthSFX),
+  sounds.load('dead', deadSFX),
 ]);
 
 $(() => {
   initializeUI();
-  sounds.playBgm('bg', 0.1);
+  sounds.playBgm('bg', 0.05);
   // import('./game')
   //   .then(({ initializeGame }) => {
   //     initializeGame();

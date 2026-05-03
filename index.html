@@ -14,9 +14,12 @@
   </head>
   <body>
     <div id="game-container" class="hidden">
-      <p id="time-remaining-label">
-        Time Remaining: <span id="time-remaining"></span>
+      <p id="time-remaining-label" class="game-label">
+        Time Remaining: <span id="time-remaining">04:00</span>
       </p>
+      <p id="health-label" class="game-label">Health: <span id="health">100</span></p>
+      <p id="partner-health-label" class="game-label">Partner's Health: <span id="partner-health">100</span></p>
+      <p id="cheat-mode" class="hidden game-label">Cheat mode activated</p>
     </div>
     <div id="home-container" class="flex flex-column">
       <form id="login-form" class="form flex flex-column" autocomplete="off">

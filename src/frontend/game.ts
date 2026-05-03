@@ -7,7 +7,8 @@ import { Application } from '../engine/application';
 
 import $ from 'jquery';
 
-import playerSpriteSheet from '../../asset/player_sprite.png';
+import player1SpriteSheet from '../../asset/player1-sprite-sheet.png';
+import player2SpriteSheet from '../../asset/player2-sprite-sheet.png';
 import weaponSpriteSheet from '../../asset/arrow.png';
 import backgroundImage from '../../asset/game-background.png';
 
@@ -15,14 +16,27 @@ import sounds from './music';
 
 import type { GameState, PlayerId, WeaponState } from '../common/game-state';
 
-const PLAYER_SETTINGS = {
-  src: playerSpriteSheet,
-  spriteWidth: 24,
-  spriteHeight: 25,
+const PLAYER_BASE_SETTINGS = {
+  spriteWidth: 16,
+  spriteHeight: 16,
   scale: 2,
   sequences: {
-    moveLeft: { row: 4, fps: 10, numberOfFrames: 10, loop: true },
+    forward: { column: 0, fps: 8, numberOfFrames: 4, loop: true },
+    backward: { column: 1, fps: 8, numberOfFrames: 4, loop: true },
+    left: { column: 2, fps: 8, numberOfFrames: 4, loop: true },
+    right: { column: 3, fps: 8, numberOfFrames: 4, loop: true },
+    dead: { row: 6, fps: 1, numberOfFrames: 1, loop: false },
   },
+};
+
+const PLAYER1_SETTINGS = {
+  ...PLAYER_BASE_SETTINGS,
+  src: player1SpriteSheet,
+};
+
+const PLAYER2_SETTINGS = {
+  ...PLAYER_BASE_SETTINGS,
+  src: player2SpriteSheet,
 };
 
 const WEAPON_SETTINGS = {
@@ -49,6 +63,11 @@ export function initializeGame(roomId: string, player: PlayerId) {
   // Set of active weapon IDs registered locally, should be synced with the server state.
   const localWeaponsState = new Map<string, WeaponState>();
   const timeRemainingElement = $('#time-remaining');
+  const healthElement = $('#health');
+  const partnerHealthElement = $('#partner-health');
+
+  let deadSFXPlayedForPlayer1 = false;
+  let deadSFXPlayedForPlayer2 = false;
 
   const app = new Application({
     rootElementSelector: '#game-container',
@@ -60,24 +79,24 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   initializeControl(roomId, player, app);
 
-  const playerA = new Sprite(PLAYER_SETTINGS);
-  const playerB = new Sprite(PLAYER_SETTINGS);
+  const player1 = new Sprite(PLAYER1_SETTINGS);
+  const player2 = new Sprite(PLAYER2_SETTINGS);
 
   // const clip = new Circle(100, 100, 100);
   // clip.setMode('clip');
   // app.registerObject('clip', clip);
 
-  app.registerObject('player1', playerA);
-  app.registerObject('player2', playerB);
+  app.registerObject('player1', player1);
+  app.registerObject('player2', player2);
 
-  playerA.setSequence('moveLeft');
-  playerB.setSequence('moveLeft');
+  player1.setSequence('forward');
+  player2.setSequence('forward');
 
-  playerA.canvasX = 100;
-  playerA.canvasY = 100;
+  player1.canvasX = 100;
+  player1.canvasY = 100;
 
-  playerB.canvasX = 100;
-  playerB.canvasY = 200;
+  player2.canvasX = 100;
+  player2.canvasY = 200;
 
   app.onTick(() => {
     for (const weapon of localWeaponsState.values()) {
@@ -103,6 +122,22 @@ export function initializeGame(roomId: string, player: PlayerId) {
       }
 
       const weaponSprite = app.getObject(weapon.id) as Sprite | undefined;
+
+      if (
+        weapon.id.startsWith(`player${player}-`) &&
+        weaponSprite?.collidesWith(player === 1 ? player2 : player1)
+      ) {
+        socket.emit('weaponHit', {
+          roomId,
+          player,
+          targetType: 'player',
+          targetId: player === 1 ? 2 : 1,
+          weaponId: weapon.id,
+        });
+
+        continue;
+      }
+
       if (weaponSprite) {
         weaponSprite.canvasX = newX;
         weaponSprite.canvasY = newY;
@@ -125,11 +160,33 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   socket.on('gameStateUpdate', (newState: GameState) => {
     console.log('Received game state update:', newState);
-    playerA.canvasX = newState.player1.x;
-    playerA.canvasY = newState.player1.y;
+    player1.canvasX = newState.player1.x;
+    player1.canvasY = newState.player1.y;
+    if (newState.player1.health <= 0) {
+      if (!deadSFXPlayedForPlayer1) {
+        sounds.playSfx('dead', 0.5);
+        deadSFXPlayedForPlayer1 = true;
+      }
 
-    playerB.canvasX = newState.player2.x;
-    playerB.canvasY = newState.player2.y;
+      player1.setSequence('dead');
+    } else {
+      player1.setSequence(newState.player1.direction as string);
+      deadSFXPlayedForPlayer1 = false;
+    }
+
+    player2.canvasX = newState.player2.x;
+    player2.canvasY = newState.player2.y;
+    if (newState.player2.health <= 0) {
+      if (!deadSFXPlayedForPlayer2) {
+        sounds.playSfx('dead', 0.5);
+        deadSFXPlayedForPlayer2 = true;
+      }
+
+      player2.setSequence('dead');
+    } else {
+      player2.setSequence(newState.player2.direction as string);
+      deadSFXPlayedForPlayer2 = false;
+    }
 
     const weaponsMap = new Map(
       newState.weapons.map((weapon) => [weapon.id, weapon]),
@@ -165,6 +222,18 @@ export function initializeGame(roomId: string, player: PlayerId) {
     }
 
     timeRemainingElement.text(formatTimeRemaining(newState.timeRemaining));
+
+    const playerHealth =
+      player === 1 ? newState.player1.health : newState.player2.health;
+    const partnerHealth =
+      player === 1 ? newState.player2.health : newState.player1.health;
+
+    healthElement
+      .text(playerHealth)
+      .css('color', playerHealth <= 20 ? 'crimson' : 'white');
+    partnerHealthElement
+      .text(partnerHealth)
+      .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
   });
 
   app.initialize();

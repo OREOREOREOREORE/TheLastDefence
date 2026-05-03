@@ -24,6 +24,8 @@ import {
   removeWeapon,
   startGameTimer,
   stopGameTimer,
+  addHealth,
+  damagePlayer,
 } from './game-state.ts';
 
 import {
@@ -43,6 +45,8 @@ import type {
   GameStateUpdateRequestMessage,
   RemoveWeaponRequestMessage,
   PlayerState,
+  WeaponHitMessage,
+  PlayerId,
 } from '../common/game-state.ts';
 
 interface Cookies {
@@ -143,9 +147,10 @@ websocketServer.on('connection', (socket) => {
         player1: {
           x: 100,
           y: 100,
-          health: 90,
+          health: 20,
           numberOfWeaponsUsed: 0,
           numberOfKills: 0,
+          direction: 'forward',
         },
         player2: {
           x: 100,
@@ -153,9 +158,10 @@ websocketServer.on('connection', (socket) => {
           health: 100,
           numberOfWeaponsUsed: 0,
           numberOfKills: 0,
+          direction: 'forward',
         },
         weapons: [],
-        timeRemaining: 5 * 1000,
+        timeRemaining: 60 * 1000,
       });
 
       startGameTimer(
@@ -276,6 +282,19 @@ websocketServer.on('connection', (socket) => {
     websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
   });
 
+  socket.on('addHealth', (data: GameStateUpdateRequestMessage) => {
+    const newState = addHealth(data.roomId, data.player);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+  });
+
+  socket.on('weaponHit', (data: WeaponHitMessage<'player' | 'monster'>) => {
+    if (data.targetType === 'player') {
+      damagePlayer(data.roomId, data.targetId as PlayerId);
+      const newState = removeWeapon(data.roomId, data.weaponId);
+      websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id, username);
     for (const room of rooms.values()) {
@@ -325,11 +344,11 @@ app.post('/login', async (req: LoginRequest, res) => {
   const verified = await argon2.verify(user.password, password);
 
   if (verified) {
-    const token = jwt.sign({ name: username }, secretKey, { expiresIn: '5m' });
+    const token = jwt.sign({ name: username }, secretKey, { expiresIn: '1h' });
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: false, //true
-      maxAge: 300000,
+      maxAge: 3600000,
     });
     return res.json({ success: true, user: { username } });
   }

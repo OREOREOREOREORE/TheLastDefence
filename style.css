@@ -136,12 +136,6 @@ h1 {
   margin: 0 auto;
 }
 
-#time-remaining-label {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-
 #end-game-container {
   padding: 24px 20px;
   background: rgba(255, 255, 255, 0.3);
@@ -202,4 +196,25 @@ h1 {
   height: 64px;
   width: 64px;
   border-radius: 50%;
+}
+
+.game-label {
+  position: absolute;
+  left: 20px;
+}
+
+.game-label:nth-of-type(1) {
+  top: 20px;
+}
+
+.game-label:nth-of-type(2) {
+  top: 40px;
+}
+
+.game-label:nth-of-type(3) {
+  top: 60px;
+}
+
+.game-label:nth-of-type(4) {
+  top: 80px;
 }
