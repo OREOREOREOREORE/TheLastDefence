@@ -1,9 +1,7 @@
 import { isIntervalsOverlap, projectPolygonToInterval } from './sat-math';
 import type { BaseObject } from './base-object';
 
-interface SpriteSequence {
-  /** Row index in the sprite sheet (0-based). */
-  row: number;
+interface SpriteSequenceBase {
   /** Number of frames in this sequence. */
   numberOfFrames: number;
   /** Playback speed in frames per second. */
@@ -11,6 +9,18 @@ interface SpriteSequence {
   /** Whether playback wraps to the first frame after the last frame. */
   loop: boolean;
 }
+
+interface SpriteSequenceHorizontal extends SpriteSequenceBase {
+  /** Row index in the sprite sheet (0-based). */
+  row: number;
+}
+
+interface SpriteSequenceVertical extends SpriteSequenceBase {
+  /** Column index in the sprite sheet (0-based). */
+  column: number;
+}
+
+type SpriteSequence = SpriteSequenceHorizontal | SpriteSequenceVertical;
 
 interface SpriteOptions {
   /** Source URL/path of the sprite sheet image. */
@@ -80,6 +90,7 @@ export class Sprite extends Image implements BaseObject {
   private sequences: Map<string, SpriteSequence>;
 
   private currentSequence: SpriteSequence | null = null;
+  private currentSequenceName: string | null = null;
   private currentFrame = 0;
 
   private lastTickTime = 0;
@@ -110,10 +121,25 @@ export class Sprite extends Image implements BaseObject {
   }: SpriteOptions) {
     super();
 
+    const clonedSequences: Record<string, SpriteSequence> =
+      structuredClone(sequences);
+
+    for (const sequence of Object.values(clonedSequences)) {
+      if ('row' in sequence) {
+        continue;
+      }
+
+      if ('column' in sequence) {
+        continue;
+      }
+
+      throw new Error('Sequence must specify direction or row/column');
+    }
+
     this.src = src;
     this.spriteWidth = spriteWidth;
     this.spriteHeight = spriteHeight;
-    this.sequences = new Map(Object.entries(sequences));
+    this.sequences = new Map(Object.entries(clonedSequences));
     this.scale = scale;
     this.canvasX = canvasX;
     this.canvasY = canvasY;
@@ -152,10 +178,19 @@ export class Sprite extends Image implements BaseObject {
     // Undo the translation so the sprite will still be drawn at the correct position
     context.translate(-this.canvasX, -this.canvasY);
 
+    const sourceX =
+      'row' in this.currentSequence
+        ? this.currentFrame * this.spriteWidth
+        : this.currentSequence.column * this.spriteWidth;
+    const sourceY =
+      'row' in this.currentSequence
+        ? this.currentSequence.row * this.spriteHeight
+        : this.currentFrame * this.spriteHeight;
+
     context.drawImage(
       this,
-      this.currentFrame * this.spriteWidth,
-      this.currentSequence.row * this.spriteHeight,
+      sourceX,
+      sourceY,
       this.spriteWidth,
       this.spriteHeight,
       this.canvasX - (this.spriteWidth * this.scale) / 2,
@@ -224,12 +259,18 @@ export class Sprite extends Image implements BaseObject {
    * @throws {Error} If the sequence name does not exist.
    */
   public setSequence(name: string) {
+    if (name === this.currentSequenceName) {
+      return;
+    }
+
     const sequence = this.sequences.get(name);
+
     if (!sequence) {
       throw new Error(`Sequence not found: ${name}`);
     }
 
     this.currentSequence = sequence;
+    this.currentSequenceName = name;
     this.currentFrame = 0;
   }
 
