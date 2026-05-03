@@ -21,6 +21,7 @@ export interface GameState {
   player2: PlayerState;
   weapons: WeaponState[];
   timeRemaining: number;
+  isCheatModeActivated: boolean;
 }
 
 export type PlayerId = 1 | 2;
