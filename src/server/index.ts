@@ -12,8 +12,6 @@ import process from 'node:process';
 import { Server } from 'socket.io';
 import { createServer } from 'node:http';
 
-
-
 import {
   addNewGameState,
   decrementX,
@@ -27,6 +25,7 @@ import {
   addHealth,
   damagePlayer,
   toggleCheatMode,
+  getGameState,
 } from './game-state.ts';
 
 import {
@@ -49,6 +48,11 @@ import type {
   WeaponHitMessage,
   PlayerId,
 } from '../common/game-state.ts';
+
+import { damageMonster } from './monster.ts';
+
+const TESTINGTIME = 30 * 1000;
+const GAME_DURATION = 60 * 1000 * 4; // 4 minutes
 
 interface Cookies {
   auth_token?: string;
@@ -94,13 +98,14 @@ function computeHitRate(playerState: PlayerState): number {
     return 0;
   }
 
-  return (playerState.numberOfKills / playerState.numberOfWeaponsUsed) * 100;
+  return (playerState.numberOfHits / playerState.numberOfWeaponsUsed) * 100;
 }
 
 function computeAndAddEndGameResult(
   roomId: string,
   player1State: PlayerState,
   player2State: PlayerState,
+  isFailed = false,
 ) {
   const currentRoom = rooms.get(parseInt(roomId, 10));
 
@@ -118,7 +123,7 @@ function computeAndAddEndGameResult(
   newRecordIds.push(
     addGameRecord(
       player1Username,
-      false,
+      isFailed,
       player1HitRate,
       player1RemainingHealth,
     ),
@@ -127,7 +132,7 @@ function computeAndAddEndGameResult(
   newRecordIds.push(
     addGameRecord(
       player2Username,
-      false,
+      isFailed,
       player2HitRate,
       player2RemainingHealth,
     ),
@@ -201,7 +206,7 @@ websocketServer.on('connection', (socket) => {
           y: 100,
           health: 20,
           numberOfWeaponsUsed: 0,
-          numberOfKills: 0,
+          numberOfHits: 0,
           direction: 'forward',
         },
         player2: {
@@ -209,11 +214,14 @@ websocketServer.on('connection', (socket) => {
           y: 200,
           health: 100,
           numberOfWeaponsUsed: 0,
-          numberOfKills: 0,
+          numberOfHits: 0,
           direction: 'forward',
         },
+        base: { x: 700, y: 315, health: 200, maxHealth: 200 },
+        monsters: [],
         weapons: [],
-        timeRemaining: 5 * 1000,
+        timeRemaining:
+          process.env.NODE_ENV === 'development' ? TESTINGTIME : GAME_DURATION,
         isCheatModeActivated: false,
       });
 
@@ -222,18 +230,19 @@ websocketServer.on('connection', (socket) => {
         (state) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
-        (state) => {
+        (state, reason) => {
           const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
             roomId,
             state.player1,
             state.player2,
+            reason === 'gameOver',
           );
 
           websocketServer
             .to(roomId)
             .emit(
               'gameEnd',
-              'finished',
+              reason,
               endGameResult,
               getGameRecords(),
               newRecordIds,
@@ -309,30 +318,51 @@ websocketServer.on('connection', (socket) => {
   });
 
   socket.on('weaponHit', (data: WeaponHitMessage<'player' | 'monster'>) => {
-    if (data.targetType === 'player') {
-      damagePlayer(data.roomId, data.targetId as PlayerId);
-      const newState = removeWeapon(data.roomId, data.weaponId);
-      websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+    const state = getGameState(data.roomId);
+    if (!state) return;
 
-      if (newState?.player1.health === 0 && newState.player2.health === 0) {
-        stopGameTimer(data.roomId);
+    // Validate that the weapon actually exists (anti-cheat / stale-message guard)
+    const weaponExists = state.weapons.some((w) => w.id === data.weaponId);
+    if (!weaponExists) return;
 
-        const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
-          data.roomId,
-          newState.player1,
-          newState.player2,
-        );
-        websocketServer
-          .to(data.roomId)
-          .emit(
-            'gameEnd',
-            'gameOver',
-            endGameResult,
-            getGameRecords(),
-            newRecordIds,
-          );
-      }
+    if (data.targetType === 'monster') {
+      damageMonster(state, data.targetId as string);
+      // if (killed) {
+      const shooter = data.player === 1 ? state.player1 : state.player2;
+      shooter.numberOfHits += 1;
+      // }
+      removeWeapon(data.roomId, data.weaponId);
+      websocketServer.to(data.roomId).emit('gameStateUpdate', state);
+      return;
     }
+
+    // if (data.targetType === 'player') {
+    const shooter = data.player === 1 ? state.player1 : state.player2;
+    damagePlayer(data.roomId, data.targetId as PlayerId);
+    shooter.numberOfHits += 1;
+    const newState = removeWeapon(data.roomId, data.weaponId);
+    websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
+
+    if (newState?.player1.health === 0 && newState.player2.health === 0) {
+      stopGameTimer(data.roomId);
+
+      const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
+        data.roomId,
+        newState.player1,
+        newState.player2,
+        true,
+      );
+      websocketServer
+        .to(data.roomId)
+        .emit(
+          'gameEnd',
+          'gameOver',
+          endGameResult,
+          getGameRecords(),
+          newRecordIds,
+        );
+    }
+    // }
   });
 
   socket.on('toggleCheatMode', (data: { roomId: string }) => {
@@ -392,7 +422,7 @@ app.post('/login', async (req: LoginRequest, res) => {
     const token = jwt.sign({ name: username }, secretKey, { expiresIn: '1h' });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: false, //true
+      secure: true, //true
       maxAge: 3600000,
     });
     return res.json({ success: true, user: { username } });

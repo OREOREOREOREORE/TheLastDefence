@@ -1,6 +1,9 @@
 import type { GameState, PlayerId } from '../common/game-state.ts';
+import { maybeSpawnMonster, tickMonsters, resetMonsterRoom } from './monster.ts';
 
 const DELTA = 10;
+const TICK_MS = 100;
+export type GameEndReason = 'finished' | 'gameOver';
 
 const gameStates = new Map<string, GameState>();
 // Timeout can't be serialized, so we keep it separate from the game state.
@@ -125,8 +128,11 @@ export function removeWeapon(roomId: string, weaponId: string) {
 export function startGameTimer(
   roomId: string,
   onTick: (state: GameState) => void,
-  onGameEnd: (state: GameState) => void,
+  onGameEnd: (state: GameState, reason: GameEndReason) => void,
 ) {
+
+  resetMonsterRoom(roomId);
+
   gameIntervals.set(
     roomId,
     setInterval(() => {
@@ -135,22 +141,33 @@ export function startGameTimer(
         return;
       }
 
-      gameState.timeRemaining -= 1000;
+      const now = Date.now();
+      const dtsec = TICK_MS / 1000;
+      tickMonsters(gameState, now, dtsec);
+      maybeSpawnMonster(gameState, roomId, dtsec);
+
+      gameState.timeRemaining -= TICK_MS;
       onTick(gameState);
 
-      if (gameState.timeRemaining <= 0) {
+      const baseDestroyed = gameState.base.health <= 0;
+      const bothPlayersDead = gameState.player1.health <= 0 && gameState.player2.health <= 0;
+      const timesUp = gameState.timeRemaining <= 0;
+
+      if (baseDestroyed || bothPlayersDead || timesUp) {
         clearInterval(gameIntervals.get(roomId));
         gameIntervals.delete(roomId);
-
-        onGameEnd(gameState);
+        resetMonsterRoom(roomId);
+        const reason: GameEndReason = baseDestroyed || bothPlayersDead ? 'gameOver' : 'finished';
+        onGameEnd(gameState, reason);
       }
-    }, 1000),
+    }, TICK_MS),
   );
 }
 
 export function stopGameTimer(roomId: string) {
   clearInterval(gameIntervals.get(roomId));
   gameIntervals.delete(roomId);
+  resetMonsterRoom(roomId);
 }
 
 export function addHealth(roomId: string, player: PlayerId) {

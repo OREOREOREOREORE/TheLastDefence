@@ -12,9 +12,12 @@ import player2SpriteSheet from '../../asset/player2-sprite-sheet.png';
 import weaponSpriteSheet from '../../asset/arrow.png';
 import backgroundImage from '../../asset/game-background.png';
 
+import monsterSpriteSheet from '../../asset/monster-sprite-sheet.png';
+import baseImage from '../../asset/base.png';
+
 import sounds from './music';
 
-import type { GameState, PlayerId, WeaponState } from '../common/game-state';
+import type { GameState, PlayerId, WeaponState, MonsterState } from '../common/game-state';
 
 const PLAYER_BASE_SETTINGS = {
   spriteWidth: 16,
@@ -49,6 +52,31 @@ const WEAPON_SETTINGS = {
   },
 };
 
+const MONSTER_SETTINGS = {
+  src: monsterSpriteSheet,
+  spriteWidth: 16,
+  spriteHeight: 16,
+  scale: 1.5,
+  sequences: {
+    forward: { column: 0, fps: 8, numberOfFrames: 4, loop: true },
+    backward: { column: 1, fps: 8, numberOfFrames: 4, loop: true },
+    left: { column: 2, fps: 8, numberOfFrames: 4, loop: true },
+    right: { column: 3, fps: 8, numberOfFrames: 4, loop: true },
+    dead: { row: 6, fps: 1, numberOfFrames: 1, loop: false },
+  },
+};
+
+const BASE_SETTINGS = {
+  src: baseImage,
+  spriteWidth: 16,
+  spriteHeight: 16,
+  scale: 3,
+  sequences: {
+    default: {row: 0, fps: 1, numberOfFrames: 1, loop: false},
+    destroy: {row : 6, fps: 1, numberOfFrames: 1, loop: false},
+  },
+}
+
 function formatTimeRemaining(milliseconds: number) {
   const numberOfMinutes = Math.floor(milliseconds / (60 * 1000));
   const numberOfSeconds = Math.floor((milliseconds % (60 * 1000)) / 1000);
@@ -66,6 +94,12 @@ export function initializeGame(roomId: string, player: PlayerId) {
   const healthElement = $('#health');
   const partnerHealthElement = $('#partner-health');
   const cheatModeIndicatorElement = $('#cheat-mode');
+  const baseHealthElement = $('#base-health');
+
+  const localMonsterSprites = new Map<string, Sprite>();
+  const baseSprite = new Sprite(BASE_SETTINGS);
+  baseSprite.setSequence('default');
+
 
   let deadSFXPlayedForPlayer1 = false;
   let deadSFXPlayedForPlayer2 = false;
@@ -89,6 +123,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   app.registerObject('player1', player1);
   app.registerObject('player2', player2);
+  app.registerObject('base', baseSprite);
 
   player1.setSequence('forward');
   player2.setSequence('forward');
@@ -124,19 +159,37 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
       const weaponSprite = app.getObject(weapon.id) as Sprite | undefined;
 
-      if (
-        weapon.id.startsWith(`player${player}-`) &&
-        weaponSprite?.collidesWith(player === 1 ? player2 : player1)
-      ) {
-        socket.emit('weaponHit', {
-          roomId,
-          player,
-          targetType: 'player',
-          targetId: player === 1 ? 2 : 1,
-          weaponId: weapon.id,
-        });
+      if (weapon.id.startsWith(`player${player}-`) && weaponSprite) {
+        // 1. Monsters first
+        let hitMonsterId: string | null = null;
+        for (const [monsterId, monsterSprite] of localMonsterSprites) {
+          if (weaponSprite.collidesWith(monsterSprite)) {
+            hitMonsterId = monsterId;
+            break;
+          }
+        }
+        if (hitMonsterId) {
+          socket.emit('weaponHit', {
+            roomId,
+            player,
+            targetType: 'monster',
+            targetId: hitMonsterId,
+            weaponId: weapon.id,
+          });
+          continue;
+        }
 
-        continue;
+        // 2. Then partner (existing PvP behavior)
+        if (weaponSprite.collidesWith(player === 1 ? player2 : player1)) {
+          socket.emit('weaponHit', {
+            roomId,
+            player,
+            targetType: 'player',
+            targetId: player === 1 ? 2 : 1,
+            weaponId: weapon.id,
+          });
+          continue;
+        }
       }
 
       if (weaponSprite) {
@@ -161,6 +214,42 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   socket.on('gameStateUpdate', (newState: GameState) => {
     console.log('Received game state update:', newState);
+
+    if (newState.base){
+      baseSprite.canvasX = newState.base.x;
+      baseSprite.canvasY = newState.base.y;
+      const currentBaseHealthText = baseHealthElement.text();
+      const displayedMaxHealth = Number.parseInt(currentBaseHealthText.split('/')[1] ?? '', 10);
+      const stateBase = newState.base as typeof newState.base & { maxHealth?: number };
+      const maxBaseHealth = typeof stateBase.maxHealth === 'number'
+        ? stateBase.maxHealth
+        : (Number.isFinite(displayedMaxHealth) ? displayedMaxHealth : newState.base.health);
+      baseHealthElement.text(`${newState.base.health}/${maxBaseHealth}`).css('color', newState.base.health <= 20 ? 'crimson' : 'white');
+    }
+
+    const inComingMonster = newState.monsters ?? [];
+    const inComingMonsterIds = new Set(inComingMonster.map((m) => m.id));
+
+    for (const id of [...localMonsterSprites.keys()]){
+      if (!inComingMonsterIds.has(id)){
+        app.removeObject(id);
+        localMonsterSprites.delete(id);
+        sounds.playSfx('monster-dead', 0.1);
+      }
+    }
+
+    for (const m of inComingMonster){
+      let monsterSprite = localMonsterSprites.get(m.id);
+      if (!monsterSprite){
+        monsterSprite = new Sprite(MONSTER_SETTINGS);
+        localMonsterSprites.set(m.id, monsterSprite);
+        app.registerObject(m.id, monsterSprite);
+      }
+      monsterSprite.canvasX = m.x;
+      monsterSprite.canvasY = m.y;
+      monsterSprite.setSequence(m.direction);
+    }
+
     player1.canvasX = newState.player1.x;
     player1.canvasY = newState.player1.y;
     if (newState.player1.health <= 0) {
@@ -238,8 +327,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
       .text(
         `${partnerHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
-      .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
-
+      .css('color', partnerHealth <= 20 ? 'crimson' : 'white')
     if (newState.isCheatModeActivated) {
       cheatModeIndicatorElement.removeClass('hidden');
     } else {
