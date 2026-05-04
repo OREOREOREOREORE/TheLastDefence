@@ -11,7 +11,7 @@ export interface BaseDefenseState extends BaseState {
 export interface PlayerState extends BaseState {
   health: number;
   numberOfWeaponsUsed: number;
-  numberOfKills: number;
+  numberOfHits: number;
   direction: 'forward' | 'backward' | 'left' | 'right';
 }
 
