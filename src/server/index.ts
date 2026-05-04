@@ -105,6 +105,7 @@ function computeAndAddEndGameResult(
   roomId: string,
   player1State: PlayerState,
   player2State: PlayerState,
+  isFailed = false,
 ) {
   const currentRoom = rooms.get(parseInt(roomId, 10));
 
@@ -122,7 +123,7 @@ function computeAndAddEndGameResult(
   newRecordIds.push(
     addGameRecord(
       player1Username,
-      false,
+      isFailed,
       player1HitRate,
       player1RemainingHealth,
     ),
@@ -131,7 +132,7 @@ function computeAndAddEndGameResult(
   newRecordIds.push(
     addGameRecord(
       player2Username,
-      false,
+      isFailed,
       player2HitRate,
       player2RemainingHealth,
     ),
@@ -234,6 +235,7 @@ websocketServer.on('connection', (socket) => {
             roomId,
             state.player1,
             state.player2,
+            reason === 'gameOver',
           );
 
           websocketServer
@@ -346,6 +348,7 @@ websocketServer.on('connection', (socket) => {
         data.roomId,
         newState.player1,
         newState.player2,
+        true,
       );
       websocketServer
         .to(data.roomId)
