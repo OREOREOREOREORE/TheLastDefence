@@ -228,7 +228,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
       if (!inComingMonsterIds.has(id)){
         app.removeObject(id);
         localMonsterSprites.delete(id);
-        sounds.playSfx('monster-death', 0.3);
+        sounds.playSfx('monster-dead', 0.1);
       }
     }
 
