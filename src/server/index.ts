@@ -337,7 +337,9 @@ websocketServer.on('connection', (socket) => {
     }
 
     // if (data.targetType === 'player') {
+    const shooter = data.player === 1 ? state.player1 : state.player2;
     damagePlayer(data.roomId, data.targetId as PlayerId);
+    shooter.numberOfHits += 1;
     const newState = removeWeapon(data.roomId, data.weaponId);
     websocketServer.to(data.roomId).emit('gameStateUpdate', newState);
 
