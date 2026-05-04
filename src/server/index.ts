@@ -418,7 +418,7 @@ app.post('/login', async (req: LoginRequest, res) => {
     const token = jwt.sign({ name: username }, secretKey, { expiresIn: '1h' });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: false, //true
+      secure: true, //true
       maxAge: 3600000,
     });
     return res.json({ success: true, user: { username } });
