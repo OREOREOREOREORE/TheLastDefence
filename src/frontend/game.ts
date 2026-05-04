@@ -218,7 +218,13 @@ export function initializeGame(roomId: string, player: PlayerId) {
     if (newState.base){
       baseSprite.canvasX = newState.base.x;
       baseSprite.canvasY = newState.base.y;
-      baseHealthElement.text(`${newState.base.health}`).css('color', newState.base.health <= 20 ? 'crimson' : 'white');
+      const currentBaseHealthText = baseHealthElement.text();
+      const displayedMaxHealth = Number.parseInt(currentBaseHealthText.split('/')[1] ?? '', 10);
+      const stateBase = newState.base as typeof newState.base & { maxHealth?: number };
+      const maxBaseHealth = typeof stateBase.maxHealth === 'number'
+        ? stateBase.maxHealth
+        : (Number.isFinite(displayedMaxHealth) ? displayedMaxHealth : newState.base.health);
+      baseHealthElement.text(`${newState.base.health}/${maxBaseHealth}`).css('color', newState.base.health <= 20 ? 'crimson' : 'white');
     }
 
     const inComingMonster = newState.monsters ?? [];
