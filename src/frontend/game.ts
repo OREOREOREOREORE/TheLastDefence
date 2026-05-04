@@ -44,9 +44,9 @@ const PLAYER2_SETTINGS = {
 
 const WEAPON_SETTINGS = {
   src: weaponSpriteSheet,
-  spriteWidth: 13,
-  spriteHeight: 5,
-  scale: 2,
+  spriteWidth: 16,
+  spriteHeight: 16,
+  scale: 1,
   sequences: {
     default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
   },
