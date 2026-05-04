@@ -6,6 +6,7 @@ import sounds from './music';
 import type { PlayerId } from '../common/game-state';
 import type { Application } from '../engine/application';
 import type { Sprite } from '../engine/sprite';
+import type { Circle } from '../engine/circle';
 
 const OBSERVED_KEYS = [
   'ArrowUp',
@@ -19,6 +20,12 @@ const OBSERVED_KEYS = [
   'h',
   'C',
 ] as const;
+
+let lastKnownMousePosition: { x: number; y: number } | null = null;
+
+export function getLastKnownMousePosition() {
+  return lastKnownMousePosition ?? { x: 0, y: 0 };
+}
 
 export function initializeControl(
   roomId: string,
@@ -104,8 +111,36 @@ export function initializeControl(
       directionNormVector,
     });
   });
+
+  $(document).on('mousemove.game', (event) => {
+    const canvasRect = app.getCanvasRect();
+
+    if (!canvasRect) {
+      return;
+    }
+
+    const canvasX = event.clientX - canvasRect.left;
+    const canvasY = event.clientY - canvasRect.top;
+
+    lastKnownMousePosition = { x: canvasX, y: canvasY };
+
+    const mask = app.getObject('mask') as Circle | undefined;
+
+    if (!mask) {
+      return;
+    }
+
+    if (mask.hidden()) {
+      return;
+    }
+
+    mask.canvasX = canvasX;
+    mask.canvasY = canvasY;
+  });
 }
 
 export function cleanupControl() {
   $(document).off('.game');
+
+  lastKnownMousePosition = null;
 }

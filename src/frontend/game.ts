@@ -1,9 +1,9 @@
 import { socket } from './socket';
-import { initializeControl, cleanupControl } from './control';
+import { initializeControl, cleanupControl, getLastKnownMousePosition } from './control';
 
 import { Sprite } from '../engine/sprite';
 import { Application } from '../engine/application';
-// import { Circle } from '../engine/circle';
+import { Circle } from '../engine/circle';
 
 import $ from 'jquery';
 
@@ -17,7 +17,7 @@ import baseImage from '../../asset/base.png';
 
 import sounds from './music';
 
-import type { GameState, PlayerId, WeaponState, MonsterState } from '../common/game-state';
+import type { GameState, PlayerId, WeaponState } from '../common/game-state';
 
 const PLAYER_BASE_SETTINGS = {
   spriteWidth: 16,
@@ -117,6 +117,11 @@ export function initializeGame(roomId: string, player: PlayerId) {
   const player1 = new Sprite(PLAYER1_SETTINGS);
   const player2 = new Sprite(PLAYER2_SETTINGS);
 
+  const mask = new Circle(0, 0, 200);
+  mask.setMode('clip');
+  mask.hide();
+  app.registerObject('mask', mask);
+
   // const clip = new Circle(100, 100, 100);
   // clip.setMode('clip');
   // app.registerObject('clip', clip);
@@ -215,32 +220,42 @@ export function initializeGame(roomId: string, player: PlayerId) {
   socket.on('gameStateUpdate', (newState: GameState) => {
     console.log('Received game state update:', newState);
 
-    if (newState.base){
-      baseSprite.canvasX = newState.base.x;
-      baseSprite.canvasY = newState.base.y;
-      const currentBaseHealthText = baseHealthElement.text();
-      const displayedMaxHealth = Number.parseInt(currentBaseHealthText.split('/')[1] ?? '', 10);
-      const stateBase = newState.base as typeof newState.base & { maxHealth?: number };
-      const maxBaseHealth = typeof stateBase.maxHealth === 'number'
+    // if (newState.base){
+    baseSprite.canvasX = newState.base.x;
+    baseSprite.canvasY = newState.base.y;
+    const currentBaseHealthText = baseHealthElement.text();
+    const displayedMaxHealth = Number.parseInt(
+      currentBaseHealthText.split('/')[1] ?? '',
+      10,
+    );
+    const stateBase = newState.base as typeof newState.base & {
+      maxHealth?: number;
+    };
+    const maxBaseHealth =
+      typeof stateBase.maxHealth === 'number'
         ? stateBase.maxHealth
-        : (Number.isFinite(displayedMaxHealth) ? displayedMaxHealth : newState.base.health);
-      baseHealthElement.text(`${newState.base.health}/${maxBaseHealth}`).css('color', newState.base.health <= 20 ? 'crimson' : 'white');
-    }
+        : Number.isFinite(displayedMaxHealth)
+          ? displayedMaxHealth
+          : newState.base.health;
+    baseHealthElement
+      .text(`${newState.base.health} /${maxBaseHealth}`)
+      .css('color', newState.base.health <= 20 ? 'crimson' : 'white');
+    // }
 
-    const inComingMonster = newState.monsters ?? [];
+    const inComingMonster = newState.monsters;
     const inComingMonsterIds = new Set(inComingMonster.map((m) => m.id));
 
-    for (const id of [...localMonsterSprites.keys()]){
-      if (!inComingMonsterIds.has(id)){
+    for (const id of [...localMonsterSprites.keys()]) {
+      if (!inComingMonsterIds.has(id)) {
         app.removeObject(id);
         localMonsterSprites.delete(id);
         sounds.playSfx('monster-dead', 0.1);
       }
     }
 
-    for (const m of inComingMonster){
+    for (const m of inComingMonster) {
       let monsterSprite = localMonsterSprites.get(m.id);
-      if (!monsterSprite){
+      if (!monsterSprite) {
         monsterSprite = new Sprite(MONSTER_SETTINGS);
         localMonsterSprites.set(m.id, monsterSprite);
         app.registerObject(m.id, monsterSprite);
@@ -320,18 +335,27 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
     healthElement
       .text(
-        `${playerHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${playerHealth} /100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
       .css('color', playerHealth <= 20 ? 'crimson' : 'white');
     partnerHealthElement
       .text(
-        `${partnerHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${partnerHealth}/100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
-      .css('color', partnerHealth <= 20 ? 'crimson' : 'white')
+      .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
     if (newState.isCheatModeActivated) {
       cheatModeIndicatorElement.removeClass('hidden');
     } else {
       cheatModeIndicatorElement.addClass('hidden');
+    }
+
+    if (newState.isMaskActivated) {
+      const { x, y } = getLastKnownMousePosition();
+      mask.canvasX = x;
+      mask.canvasY = y;
+      mask.show();
+    } else {
+      mask.hide();
     }
   });
 

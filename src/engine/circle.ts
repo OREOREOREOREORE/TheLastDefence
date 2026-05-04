@@ -7,6 +7,8 @@ export class Circle implements BaseObject {
   private fillStyle = '#000';
   private strokeStyle = '#000';
 
+  private isHidden = false;
+
   public canvasX: number;
   public canvasY: number;
   public radius: number;
@@ -27,6 +29,18 @@ export class Circle implements BaseObject {
     }
   }
 
+  public hide() {
+    this.isHidden = true;
+  }
+
+  public show() {
+    this.isHidden = false;
+  }
+
+  public hidden() {
+    return this.isHidden;
+  }
+
   public setStrokeStyle(strokeStyle: string) {
     if (this.mode === 'stroke') {
       this.strokeStyle = strokeStyle;
@@ -34,6 +48,10 @@ export class Circle implements BaseObject {
   }
 
   public tick(_time: number, context: CanvasRenderingContext2D) {
+    if (this.isHidden) {
+      return;
+    }
+
     if (this.mode !== 'clip') {
       context.save();
 
@@ -52,9 +70,12 @@ export class Circle implements BaseObject {
         context.stroke();
         break;
       case 'clip':
-        // Draw a circle outline
-        context.stroke();
+        // Draw a dark overlay
+        context.fillStyle = '#000';
+        context.rect(0, 0, context.canvas.width, context.canvas.height);
+        context.fill('evenodd');
 
+        context.fillStyle = this.fillStyle;
         // Set the clipping region to the circle
         context.beginPath();
         context.arc(this.canvasX, this.canvasY, this.radius, 0, Math.PI * 2);

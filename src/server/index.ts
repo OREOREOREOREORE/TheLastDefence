@@ -223,6 +223,7 @@ websocketServer.on('connection', (socket) => {
         timeRemaining:
           process.env.NODE_ENV === 'development' ? TESTINGTIME : GAME_DURATION,
         isCheatModeActivated: false,
+        isMaskActivated: false,
       });
 
       startGameTimer(

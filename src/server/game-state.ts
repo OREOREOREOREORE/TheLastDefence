@@ -147,6 +147,11 @@ export function startGameTimer(
       maybeSpawnMonster(gameState, roomId, dtsec);
 
       gameState.timeRemaining -= TICK_MS;
+      
+      if (gameState.timeRemaining < 1000 * 10) {
+        gameState.isMaskActivated = true;
+      }
+
       onTick(gameState);
 
       const baseDestroyed = gameState.base.health <= 0;

@@ -55,6 +55,7 @@ export interface GameState {
   weapons: WeaponState[];
   timeRemaining: number; // server side
   isCheatModeActivated: boolean;
+  isMaskActivated: boolean;
 }
 
 export type PlayerId = 1 | 2;
