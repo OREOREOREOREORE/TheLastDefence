@@ -52,7 +52,7 @@ export function addGameRecord(
 
 export function getGameRecords() {
   const prepareStatement = db.prepare(`
-    SELECT * FROM gameRecords 
+    SELECT * FROM gameRecords
     ORDER BY hitRate DESC, remainingHealth DESC, timestamp DESC
   `);
   return prepareStatement.all();

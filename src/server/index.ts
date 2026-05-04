@@ -27,6 +27,7 @@ import {
   addHealth,
   damagePlayer,
   toggleCheatMode,
+  getGameState,
 } from './game-state.ts';
 
 import {
@@ -49,6 +50,11 @@ import type {
   WeaponHitMessage,
   PlayerId,
 } from '../common/game-state.ts';
+
+import { damageMonster } from './monster.ts';
+
+const TESTINGTIME = 30 * 1000;
+const GAME_DURATION = 60 * 1000 * 4; // 4 minutes
 
 interface Cookies {
   auth_token?: string;
@@ -212,8 +218,10 @@ websocketServer.on('connection', (socket) => {
           numberOfKills: 0,
           direction: 'forward',
         },
+        base: {x: 700, y: 315, health: 200, maxHealth: 200},
+        monsters: [],
         weapons: [],
-        timeRemaining: 5 * 1000,
+        timeRemaining: TESTINGTIME, // 1000ms * 5 = 5s
         isCheatModeActivated: false,
       });
 
@@ -222,7 +230,7 @@ websocketServer.on('connection', (socket) => {
         (state) => {
           websocketServer.to(roomId).emit('gameStateUpdate', state);
         },
-        (state) => {
+        (state, reason) => {
           const [endGameResult, newRecordIds] = computeAndAddEndGameResult(
             roomId,
             state.player1,
@@ -233,7 +241,7 @@ websocketServer.on('connection', (socket) => {
             .to(roomId)
             .emit(
               'gameEnd',
-              'finished',
+              reason,
               endGameResult,
               getGameRecords(),
               newRecordIds,
@@ -309,6 +317,24 @@ websocketServer.on('connection', (socket) => {
   });
 
   socket.on('weaponHit', (data: WeaponHitMessage<'player' | 'monster'>) => {
+    const state = getGameState(data.roomId);
+    if (!state) return;
+
+    // Validate that the weapon actually exists (anti-cheat / stale-message guard)
+    const weaponExists = state.weapons.some((w) => w.id === data.weaponId);
+    if (!weaponExists) return;
+
+    if (data.targetType === 'monster'){
+      const killed = damageMonster(state, data.targetId as string);
+      if (killed){
+        const shooter = data.player === 1 ? state.player1 : state.player2;
+        shooter.numberOfKills += 1;
+      }
+      removeWeapon(data.roomId, data.weaponId);
+      websocketServer.to(data.roomId).emit('gameStateUpdate', state);
+      return;
+    }
+
     if (data.targetType === 'player') {
       damagePlayer(data.roomId, data.targetId as PlayerId);
       const newState = removeWeapon(data.roomId, data.weaponId);
