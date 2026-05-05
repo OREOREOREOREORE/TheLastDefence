@@ -2,7 +2,8 @@ import $ from 'jquery';
 import { initializeUI } from './ui';
 import sounds from './music';
 
-import backgroundMusic from '../../asset/sounds/Gold_Coin_Sprint.mp3';
+import gameRoomBGM from '../../asset/sounds/game-room.mp3';
+import inGameGBM from '../../asset/sounds/in-game.mp3';
 import arrowSFX from '../../asset/sounds/arrow.wav';
 import addHealthSFX from '../../asset/sounds/add-health.wav';
 import deadSFX from '../../asset/sounds/dead.wav';
@@ -10,7 +11,8 @@ import monsterDeadSFX from '../../asset/sounds/monster-dead.wav';
 import baseDestroyedSFX from '../../asset/sounds/base-destroyed.wav';
 
 await Promise.all([
-  sounds.load('bg', backgroundMusic),
+  sounds.load('game-room-bg', gameRoomBGM),
+  sounds.load('in-game-bg', inGameGBM),
   sounds.load('shoot', arrowSFX),
   sounds.load('addHealth', addHealthSFX),
   sounds.load('dead', deadSFX),
@@ -20,7 +22,7 @@ await Promise.all([
 
 $(() => {
   initializeUI();
-  sounds.playBgm('bg', 0.05);
+  sounds.playBgm('game-room-bg', 0.05);
   // import('./game')
   //   .then(({ initializeGame }) => {
   //     initializeGame();

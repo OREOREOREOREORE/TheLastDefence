@@ -81,6 +81,8 @@ function formatTimeRemaining(milliseconds: number) {
 }
 
 export function initializeGame(roomId: string, player: PlayerId) {
+  sounds.playBgm('in-game-bg', 0.05);
+
   // Set of active weapon IDs registered locally, should be synced with the server state.
   const localWeaponsState = new Map<string, WeaponState>();
   const timeRemainingElement = $('#time-remaining');
