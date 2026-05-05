@@ -7,6 +7,7 @@ import arrowSFX from '../../asset/sounds/arrow.wav';
 import addHealthSFX from '../../asset/sounds/add-health.wav';
 import deadSFX from '../../asset/sounds/dead.wav';
 import monsterDeadSFX from '../../asset/sounds/monster-dead.wav';
+import baseDestroyedSFX from '../../asset/sounds/base-destroyed.wav';
 
 await Promise.all([
   sounds.load('bg', backgroundMusic),
@@ -14,6 +15,7 @@ await Promise.all([
   sounds.load('addHealth', addHealthSFX),
   sounds.load('dead', deadSFX),
   sounds.load('monster-dead', monsterDeadSFX),
+  sounds.load('base-damaged', baseDestroyedSFX),
 ]);
 
 $(() => {

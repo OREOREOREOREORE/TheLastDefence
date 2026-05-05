@@ -95,6 +95,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
   let deadSFXPlayedForPlayer1 = false;
   let deadSFXPlayedForPlayer2 = false;
+  let baseDamagedSFXPlayed = false;
 
   const app = new Application({
     rootElementSelector: '#game-container',
@@ -236,6 +237,10 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
     if (newState.base.health <= newState.base.maxHealth * 0.5) {
       baseSprite.setSequence('damaged');
+      if (!baseDamagedSFXPlayed) {
+        sounds.playSfx('base-damaged', 0.5);
+        baseDamagedSFXPlayed = true;
+      }
     }
 
     if (newState.base.health <= 0) {
