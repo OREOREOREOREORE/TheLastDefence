@@ -64,8 +64,9 @@ const BASE_SETTINGS = {
   spriteHeight: 46,
   scale: 1.5,
   sequences: {
-    default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
-    destroy: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
+    default: { column: 0, fps: 1, numberOfFrames: 1, loop: false },
+    damaged: { column: 1, fps: 1, numberOfFrames: 1, loop: false },
+    destroy: { column: 2, fps: 1, numberOfFrames: 1, loop: false },
   },
 };
 
@@ -91,7 +92,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
   const localMonsterSprites = new Map<string, Sprite>();
   const baseSprite = new Sprite(BASE_SETTINGS);
   baseSprite.setSequence('default');
-
 
   let deadSFXPlayedForPlayer1 = false;
   let deadSFXPlayedForPlayer2 = false;
@@ -233,6 +233,14 @@ export function initializeGame(roomId: string, player: PlayerId) {
       )
       .css('color', newState.base.health <= 20 ? 'crimson' : 'white');
     // }
+
+    if (newState.base.health <= newState.base.maxHealth * 0.5) {
+      baseSprite.setSequence('damaged');
+    }
+
+    if (newState.base.health <= 0) {
+      baseSprite.setSequence('destroy');
+    }
 
     const inComingMonster = newState.monsters;
     const inComingMonsterIds = new Set(inComingMonster.map((m) => m.id));
