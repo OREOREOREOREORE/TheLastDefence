@@ -16,8 +16,6 @@ interface NearestPlayerResult extends PlayerCandidate {
 
 // ─── Tunables ───────────────────────────────────────────────────────────────
 
-const CANVAS_WIDTH = 1400;
-const CANVAS_HEIGHT = 630;
 const GAME_LENGTH_MS = 4 * 60 * 1000;
 
 const MONSTER_STATS = {
