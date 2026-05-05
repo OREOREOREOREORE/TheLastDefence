@@ -148,7 +148,7 @@ export function startGameTimer(
 
       gameState.timeRemaining -= TICK_MS;
       
-      if (gameState.timeRemaining < 1000 * 10) {
+      if (gameState.timeRemaining < 1000 * 30) {
         gameState.isMaskActivated = true;
       }
 

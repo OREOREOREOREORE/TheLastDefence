@@ -2,6 +2,8 @@ import $ from 'jquery';
 import { connectSocket, socket } from './socket.ts';
 import { Authentication } from './auth.ts';
 
+import sounds from './music';
+
 import type { Room } from '../common/game-room';
 import type { Player } from '../common/game-room';
 import type { GameRecord } from '../common/game-record';
@@ -87,12 +89,23 @@ export function initializeUI() {
       records?: GameRecord[],
       newRecordIds?: [number, number],
     ) => {
-      appDestroyCallback?.();
-      $('#game-container').addClass('hidden');
+      sounds.playBgm('game-room-bg', 0.05);
 
-      const currentUsername = Authentication.getUser()?.username ?? '';
+      if (reason !== 'finished' && reason !== 'gameOver') {
+        appDestroyCallback?.();
+        $('#game-container').addClass('hidden');
+        alert(`Game ended due to unexpected reason: ${reason}`);
+        $('#start-menu').removeClass('hidden').addClass('flex');
+        $('#home-container').removeClass('hidden').addClass('flex');
 
-      if (reason === 'finished' || reason === 'gameOver') {
+        return;
+      }
+
+      setTimeout(() => {
+        const currentUsername = Authentication.getUser()?.username ?? '';
+        appDestroyCallback?.();
+        $('#game-container').addClass('hidden');
+
         // The last page open should be the start menu
         $('#start-menu').removeClass('flex').addClass('hidden');
         $('#end-game-container').removeClass('hidden').addClass('flex');
@@ -144,13 +157,7 @@ export function initializeUI() {
 
           console.log('Game records:', records, newRecordIds);
         }
-
-        return;
-      }
-
-      alert(`Game ended due to unexpected reason: ${reason}`);
-      $('#start-menu').removeClass('hidden').addClass('flex');
-      $('#home-container').removeClass('hidden').addClass('flex');
+      }, 1000);
     },
   );
 

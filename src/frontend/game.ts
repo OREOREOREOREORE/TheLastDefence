@@ -315,7 +315,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
         continue;
       }
 
-      sounds.playSfx('shoot', 0.2);
+      sounds.playSfx('shoot', 0.1);
 
       const weaponSprite = new Sprite(WEAPON_SETTINGS);
       weaponSprite.setSequence('default');

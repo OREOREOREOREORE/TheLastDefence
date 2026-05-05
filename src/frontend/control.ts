@@ -17,7 +17,7 @@ const OBSERVED_KEYS = [
   'a',
   's',
   'd',
-  'h',
+  'f',
   'C',
 ] as const;
 

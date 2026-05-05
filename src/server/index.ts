@@ -51,7 +51,7 @@ import type {
 
 import { damageMonster } from './monster.ts';
 
-const TESTINGTIME = 30 * 1000;
+const TESTINGTIME = 60 * 2 * 1000;
 const GAME_DURATION = 60 * 1000 * 4; // 4 minutes
 
 interface Cookies {
