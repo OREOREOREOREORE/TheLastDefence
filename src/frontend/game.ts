@@ -53,29 +53,21 @@ const WEAPON_SETTINGS = {
 };
 
 const MONSTER_SETTINGS = {
+  ...PLAYER_BASE_SETTINGS,
   src: monsterSpriteSheet,
-  spriteWidth: 16,
-  spriteHeight: 16,
   scale: 1.5,
-  sequences: {
-    forward: { column: 0, fps: 8, numberOfFrames: 4, loop: true },
-    backward: { column: 1, fps: 8, numberOfFrames: 4, loop: true },
-    left: { column: 2, fps: 8, numberOfFrames: 4, loop: true },
-    right: { column: 3, fps: 8, numberOfFrames: 4, loop: true },
-    dead: { row: 6, fps: 1, numberOfFrames: 1, loop: false },
-  },
 };
 
 const BASE_SETTINGS = {
   src: baseImage,
-  spriteWidth: 16,
-  spriteHeight: 16,
-  scale: 3,
+  spriteWidth: 64,
+  spriteHeight: 46,
+  scale: 1.5,
   sequences: {
-    default: {row: 0, fps: 1, numberOfFrames: 1, loop: false},
-    destroy: {row : 6, fps: 1, numberOfFrames: 1, loop: false},
+    default: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
+    destroy: { row: 0, fps: 1, numberOfFrames: 1, loop: false },
   },
-}
+};
 
 function formatTimeRemaining(milliseconds: number) {
   const numberOfMinutes = Math.floor(milliseconds / (60 * 1000));
@@ -126,9 +118,9 @@ export function initializeGame(roomId: string, player: PlayerId) {
   // clip.setMode('clip');
   // app.registerObject('clip', clip);
 
+  app.registerObject('base', baseSprite);
   app.registerObject('player1', player1);
   app.registerObject('player2', player2);
-  app.registerObject('base', baseSprite);
 
   player1.setSequence('forward');
   player2.setSequence('forward');
@@ -218,8 +210,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
   // });
 
   socket.on('gameStateUpdate', (newState: GameState) => {
-    console.log('Received game state update:', newState);
-
     // if (newState.base){
     baseSprite.canvasX = newState.base.x;
     baseSprite.canvasY = newState.base.y;
@@ -238,7 +228,9 @@ export function initializeGame(roomId: string, player: PlayerId) {
           ? displayedMaxHealth
           : newState.base.health;
     baseHealthElement
-      .text(`${newState.base.health} /${maxBaseHealth}`)
+      .text(
+        `${newState.base.health} /${maxBaseHealth} ${newState.isCheatModeActivated ? '[Immortal]' : ''}`,
+      )
       .css('color', newState.base.health <= 20 ? 'crimson' : 'white');
     // }
 
@@ -340,7 +332,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
       .css('color', playerHealth <= 20 ? 'crimson' : 'white');
     partnerHealthElement
       .text(
-        `${partnerHealth}/100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${partnerHealth} /100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
       .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
     if (newState.isCheatModeActivated) {
