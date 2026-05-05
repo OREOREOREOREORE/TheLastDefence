@@ -217,7 +217,7 @@ websocketServer.on('connection', (socket) => {
           numberOfHits: 0,
           direction: 'forward',
         },
-        base: { x: 700, y: 315, health: 200, maxHealth: 200 },
+        base: { x: 700, y: 315, health: 300, maxHealth: 300 },
         monsters: [],
         weapons: [],
         timeRemaining:
