@@ -204,7 +204,7 @@ websocketServer.on('connection', (socket) => {
         player1: {
           x: 100,
           y: 100,
-          health: 20,
+          health: 100,
           numberOfWeaponsUsed: 0,
           numberOfHits: 0,
           direction: 'forward',
