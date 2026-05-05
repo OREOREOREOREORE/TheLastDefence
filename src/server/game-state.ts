@@ -147,7 +147,7 @@ export function startGameTimer(
       maybeSpawnMonster(gameState, roomId, dtsec);
 
       gameState.timeRemaining -= TICK_MS;
-      
+
       if (gameState.timeRemaining < 1000 * 30) {
         gameState.isMaskActivated = true;
       }

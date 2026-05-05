@@ -13,6 +13,13 @@ export interface PlayerState extends BaseState {
   numberOfWeaponsUsed: number;
   numberOfHits: number;
   direction: 'forward' | 'backward' | 'left' | 'right';
+
+  level: number;
+  exp: number;
+  expToNext: number;
+  damage: number;
+  speed: number;
+  maxHealth: number;
 }
 
 export interface WeaponState extends BaseState {
