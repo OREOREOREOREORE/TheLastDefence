@@ -85,7 +85,7 @@ export function initializeUI() {
       statistics?: Record<
         string,
         Pick<GameRecord, 'hitRate' | 'remainingHealth'>
-      >,
+      > & { isBaseDestroyed: boolean },
       records?: GameRecord[],
       newRecordIds?: [number, number],
     ) => {
@@ -113,7 +113,9 @@ export function initializeUI() {
 
         if (statistics && records) {
           const isFailed = reason === 'gameOver';
-          const outcome = isFailed ? 'Mission Failed' : 'Mission Accomplished';
+          const outcome = isFailed
+            ? `Mission Failed${statistics.isBaseDestroyed ? ' (Base Destroyed)' : ''}`
+            : `Mission Accomplished`;
 
           const partnerUsername =
             Object.keys(statistics).find((u) => u !== currentUsername) ?? '';
@@ -157,7 +159,7 @@ export function initializeUI() {
 
           console.log('Game records:', records, newRecordIds);
         }
-      }, 1000);
+      }, 800);
     },
   );
 
