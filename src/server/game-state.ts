@@ -1,7 +1,7 @@
 import type { GameState, PlayerId } from '../common/game-state.ts';
 import { maybeSpawnMonster, tickMonsters, resetMonsterRoom } from './monster.ts';
 
-const DELTA = 10;
+// const DELTA = 10;
 const TICK_MS = 100;
 export type GameEndReason = 'finished' | 'gameOver';
 
@@ -19,15 +19,12 @@ export function getGameState(roomId: string): GameState | undefined {
 
 export function incrementX(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
-  const delta = DELTA * (state?.isCheatModeActivated ? 2 : 1);
 
   if (state) {
-    if (player === 1 && state.player1.health > 0) {
-      state.player1.x += delta;
-      state.player1.direction = 'right';
-    } else if (player === 2 && state.player2.health > 0) {
-      state.player2.x += delta;
-      state.player2.direction = 'right';
+    const p = player === 1 ? state.player1 : state.player2;
+    if (p.health > 0) {
+      p.x += p.speed * (state.isCheatModeActivated ? 2 : 1);
+      p.direction = 'right';
     }
   }
 
@@ -36,15 +33,12 @@ export function incrementX(roomId: string, player: PlayerId) {
 
 export function decrementX(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
-  const delta = DELTA * (state?.isCheatModeActivated ? 2 : 1);
 
   if (state) {
-    if (player === 1 && state.player1.health > 0) {
-      state.player1.x -= delta;
-      state.player1.direction = 'left';
-    } else if (player === 2 && state.player2.health > 0) {
-      state.player2.x -= delta;
-      state.player2.direction = 'left';
+    const p = player === 1 ? state.player1 : state.player2;
+    if (p.health > 0) {
+      p.x -= p.speed * (state.isCheatModeActivated ? 2 : 1);
+      p.direction = 'left';
     }
   }
 
@@ -53,15 +47,12 @@ export function decrementX(roomId: string, player: PlayerId) {
 
 export function incrementY(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
-  const delta = DELTA * (state?.isCheatModeActivated ? 2 : 1);
 
   if (state) {
-    if (player === 1 && state.player1.health > 0) {
-      state.player1.y += delta;
-      state.player1.direction = 'forward';
-    } else if (player === 2 && state.player2.health > 0) {
-      state.player2.y += delta;
-      state.player2.direction = 'forward';
+    const p = player === 1 ? state.player1 : state.player2;
+    if (p.health > 0){
+      p.y += p.speed * (state.isCheatModeActivated ? 2 : 1);
+      p.direction = 'forward';
     }
   }
 
@@ -70,15 +61,12 @@ export function incrementY(roomId: string, player: PlayerId) {
 
 export function decrementY(roomId: string, player: PlayerId) {
   const state = gameStates.get(roomId);
-  const delta = DELTA * (state?.isCheatModeActivated ? 2 : 1);
 
   if (state) {
-    if (player === 1 && state.player1.health > 0) {
-      state.player1.y -= delta;
-      state.player1.direction = 'backward';
-    } else if (player === 2 && state.player2.health > 0) {
-      state.player2.y -= delta;
-      state.player2.direction = 'backward';
+    const p = player === 1 ? state.player1 : state.player2;
+    if (p.health > 0){
+      p.y -=  p.speed * (state.isCheatModeActivated ? 2 : 1);
+      p.direction = 'backward';
     }
   }
 
@@ -181,7 +169,7 @@ export function addHealth(roomId: string, player: PlayerId) {
   if (state) {
     const targetPlayer = player === 1 ? state.player2 : state.player1;
 
-    targetPlayer.health = Math.min(100, targetPlayer.health + 10);
+    targetPlayer.health = Math.min(targetPlayer.maxHealth, targetPlayer.health + 10);
   }
 
   return state;
@@ -206,8 +194,8 @@ export function toggleCheatMode(roomId: string) {
     state.isCheatModeActivated = !state.isCheatModeActivated;
 
     if (state.isCheatModeActivated) {
-      state.player1.health = 100;
-      state.player2.health = 100;
+      state.player1.health = state.player1.maxHealth;
+      state.player2.health = state.player2.maxHealth;
     }
   }
 
