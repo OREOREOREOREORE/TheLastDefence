@@ -22,7 +22,7 @@ const UPGRADES = [
 
 function awardKill (p: PlayerState, base: BaseDefenseState) {
     p.exp += EXP_PER_KILL;
-    while(p.exp >= p.expToNext){
+    if(p.exp >= p.expToNext){
         p.exp -= p.expToNext;
         p.level += 1;
         p.expToNext = Math.ceil(p.expToNext * EXP_GROWTH_RATE);

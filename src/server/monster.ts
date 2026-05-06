@@ -29,7 +29,7 @@ const MONSTER_STATS = {
 };
 
 const SPAWN_RATE_START = 0.3; // monsters/sec at t=0
-const SPAWN_RATE_END = 3.0; // monsters/sec at t=GAME_LENGTH_MS
+const SPAWN_RATE_END = 1.5; // monsters/sec at t=GAME_LENGTH_MS
 const MAX_ALIVE_MONSTERS = 60;
 
 export const ARROW_DAMAGE_TO_MONSTER = 20;
