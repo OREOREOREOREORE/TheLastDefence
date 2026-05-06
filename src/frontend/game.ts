@@ -227,6 +227,17 @@ export function initializeGame(roomId: string, player: PlayerId) {
     const stateBase = newState.base as typeof newState.base & {
       maxHealth?: number;
     };
+
+    const me = player === 1 ? newState.player1 : newState.player2;
+    $('#level').text(me.level);
+    $('#exp').text(me.exp);
+    $('#exp-to-next').text(me.expToNext);
+    $('#exp-bar-fill').css('width', `${((me.exp / me.expToNext) * 100).toFixed(1)}%`);
+    $('#stat-damage').text(me.damage);
+    $('#stat-speed').text(me.speed);
+    $('#stat-maxhealth').text(me.maxHealth);
+
+
     const maxBaseHealth =
       typeof stateBase.maxHealth === 'number'
         ? stateBase.maxHealth
@@ -345,14 +356,15 @@ export function initializeGame(roomId: string, player: PlayerId) {
 
     healthElement
       .text(
-        `${playerHealth} /100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${playerHealth} /${newState.player1.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
       .css('color', playerHealth <= 20 ? 'crimson' : 'white');
     partnerHealthElement
       .text(
-        `${partnerHealth} /100${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${partnerHealth} /${newState.player2.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
       .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
+
     if (newState.isCheatModeActivated) {
       cheatModeIndicatorElement.removeClass('hidden');
     } else {
