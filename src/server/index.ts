@@ -55,7 +55,7 @@ import { damageMonster } from './monster.ts';
 import { STARTING_PLAYER_STAT, awardKill } from './exp.ts';
 
 const TESTINGTIME = 60 * 2 * 1000;
-const GAME_DURATION = 60 * 1000 * 4; // 4 minutes
+const GAME_DURATION = 60 * 1000 * 3; // 3 minutes
 
 interface Cookies {
   auth_token?: string;
