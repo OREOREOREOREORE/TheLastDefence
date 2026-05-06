@@ -55,11 +55,9 @@ export function initializeControl(
       socket.emit('incrementX', { roomId, player });
     }
 
-    if (event.key === 'h') {
+    if (event.key === 'f') {
       const currentPlayer = `player${player}`;
       const targetPlayer = `player${player === 1 ? 2 : 1}`;
-
-      console.log('Checking collision for health pickup...');
 
       if (
         (app.getObject(currentPlayer) as Sprite).collidesWith(
@@ -68,8 +66,6 @@ export function initializeControl(
       ) {
         socket.emit('addHealth', { roomId, player });
         sounds.playSfx('addHealth', 0.5);
-      } else {
-        console.log('No collision detected for health pickup.');
       }
     }
 
