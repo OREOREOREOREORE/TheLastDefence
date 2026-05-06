@@ -254,7 +254,7 @@ function tickMonsters(state: GameState, now: number, dtSec: number) {
 function damageMonster(
   state: GameState,
   monsterId: string,
-  amount = ARROW_DAMAGE_TO_MONSTER,
+  amount: number
 ): boolean {
   const m = state.monsters.find((x) => x.id === monsterId);
   if (!m) return false;

@@ -52,7 +52,7 @@ import type {
 import type { GameRecord } from '../common/game-record.d.ts';
 
 import { damageMonster } from './monster.ts';
-import { STARTING_PLAYER, awardKill } from './exp.ts';
+import { STARTING_PLAYER_STAT, awardKill } from './exp.ts';
 
 const TESTINGTIME = 60 * 2 * 1000;
 const GAME_DURATION = 60 * 1000 * 4; // 4 minutes
@@ -218,7 +218,7 @@ websocketServer.on('connection', (socket) => {
           numberOfWeaponsUsed: 0,
           numberOfHits: 0,
           direction: 'forward',
-          ...STARTING_PLAYER,
+          ...STARTING_PLAYER_STAT,
         },
         player2: {
           x: 800,
@@ -227,7 +227,7 @@ websocketServer.on('connection', (socket) => {
           numberOfWeaponsUsed: 0,
           numberOfHits: 0,
           direction: 'forward',
-          ...STARTING_PLAYER,
+          ...STARTING_PLAYER_STAT,
         },
         base: { x: 700, y: 315, health: 300, maxHealth: 300 },
         monsters: [],
@@ -340,8 +340,8 @@ websocketServer.on('connection', (socket) => {
     if (!weaponExists) return;
 
     if (data.targetType === 'monster') {
-      const killed = damageMonster(state, data.targetId as string);
       const shooter = data.player === 1 ? state.player1 : state.player2;
+      const killed = damageMonster(state, data.targetId as string, shooter.damage);
       shooter.numberOfHits += 1;
 
       if (killed) awardKill(shooter, state.base);
@@ -353,7 +353,7 @@ websocketServer.on('connection', (socket) => {
 
     // if (data.targetType === 'player') {
     const shooter = data.player === 1 ? state.player1 : state.player2;
-    damagePlayer(data.roomId, data.targetId as PlayerId);
+    damagePlayer(data.roomId, data.targetId as PlayerId, shooter.damage);
     shooter.numberOfHits += 1;
     const newState = removeWeapon(data.roomId, data.weaponId);
     websocketServer.to(data.roomId).emit('gameStateUpdate', newState);

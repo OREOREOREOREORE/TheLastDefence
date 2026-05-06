@@ -21,7 +21,21 @@
       <p class="game-label">Base Health: <span id="base-health">200 /200</span></p>
       <p id="partner-health-label" class="game-label">Partner's Health: <span id="partner-health">100 /100</span></p>
       <p id="cheat-mode" class="hidden game-label">Cheat mode activated</p>
+      <div class="right-game-container">
+        <p class="game-label">
+          Lv <span id="level">1</span>
+          · EXP <span id="exp">0</span>/<span id="exp-to-next">30</span>
+        </p>
+        <div id="exp-bar">
+          <div id="exp-bar-fill"></div>
+        </div>
+        <p class="game-label">
+          DMG <span id="stat-damage">10</span> ·
+          SPD <span id="stat-speed">10</span>
+        </p>
+      </div>
     </div>
+
     <div id="home-container" class="flex flex-column">
       <form id="login-form" class="form flex flex-column" autocomplete="off">
         <h1>Login</h1>

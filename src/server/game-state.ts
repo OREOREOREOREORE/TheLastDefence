@@ -187,13 +187,13 @@ export function addHealth(roomId: string, player: PlayerId) {
   return state;
 }
 
-export function damagePlayer(roomId: string, player: PlayerId) {
+export function damagePlayer(roomId: string, player: PlayerId, damage: number) {
   const state = gameStates.get(roomId);
 
   if (state && !state.isCheatModeActivated) {
     const targetPlayer = player === 1 ? state.player1 : state.player2;
 
-    targetPlayer.health = Math.max(0, targetPlayer.health - 20);
+    targetPlayer.health = Math.max(0, targetPlayer.health - damage);
   }
 
   return state;
