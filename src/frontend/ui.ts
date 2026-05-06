@@ -89,9 +89,9 @@ export function initializeUI() {
       records?: GameRecord[],
       newRecordIds?: [number, number],
     ) => {
-      sounds.playBgm('game-room-bg', 0.05);
-
       if (reason !== 'finished' && reason !== 'gameOver') {
+        sounds.playBgm('game-room-bg', 0.05);
+
         appDestroyCallback?.();
         $('#game-container').addClass('hidden');
         alert(`Game ended due to unexpected reason: ${reason}`);
@@ -101,7 +101,13 @@ export function initializeUI() {
         return;
       }
 
+      if (reason === 'gameOver') {
+        sounds.playSfx('game-over', 0.1);
+      }
+
       setTimeout(() => {
+        sounds.playBgm('game-room-bg', 0.05);
+
         const currentUsername = Authentication.getUser()?.username ?? '';
         appDestroyCallback?.();
         $('#game-container').addClass('hidden');
@@ -159,7 +165,7 @@ export function initializeUI() {
 
           console.log('Game records:', records, newRecordIds);
         }
-      }, 800);
+      }, 500);
     },
   );
 
