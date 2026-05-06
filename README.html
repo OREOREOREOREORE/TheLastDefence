@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Instructions</title>
+
+    <style>
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+
+      pre {
+        font-family: monospace;
+        display: inline-block;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Prerequisite</h1>
+    <p>
+      Before you can run the game, make sure your Node.js is of version >=
+      23.6.0
+    </p>
+    <p>As this project uses Typescript as well as SQLite modules</p>
+    <h1>Installation Instructions</h1>
+    <ol>
+      <li>
+        Run
+        <pre>npm install</pre>
+        . This should install all the required dependencies and build the
+        project.
+      </li>
+      <li>
+        Run
+        <pre>node src/server/index.ts</pre>
+      </li>
+      <li>
+        Open the browser and navigate to
+        <a href="http://localhost:8000">http://localhost:8000</a>. You should
+        see a login page.
+      </li>
+      <li>
+        You can register a new account with your desired credentials. You may
+        login afterwards
+      </li>
+    </ol>
+    <p>
+      Note: For the game description and instructions you can see it after login
+      and pressing the About button.
+    </p>
+  </body>
+</html>
