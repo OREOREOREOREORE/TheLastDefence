@@ -119,11 +119,12 @@ function moveToward(
   targetX: number,
   targetY: number,
   dtSec: number,
+  isTargetBase = false,
 ) {
   const dx = targetX - m.x;
   const dy = targetY - m.y;
   const len = Math.hypot(dx, dy);
-  if (len < 1e-3) return;
+  if (len < (isTargetBase ? 30 : 1e-3)) return;
 
   const step = Math.min(m.speed * dtSec, len);
   m.x += (dx / len) * step;
@@ -244,7 +245,7 @@ function tickMonsters(state: GameState, now: number, dtSec: number) {
       }
     } else {
       m.mode = m.targetType === 'player' ? 'chasingPlayer' : 'chasingBase';
-      moveToward(m, target.x, target.y, dtSec);
+      moveToward(m, target.x, target.y, dtSec, m.targetType === 'base');
     }
   }
 }
