@@ -21,7 +21,7 @@ const GAME_LENGTH_MS = 4 * 60 * 1000;
 const MONSTER_STATS = {
   maxHealth: 30,
   speed: 20, // px/sec
-  attackDamage: 10,
+  attackDamage: 5,
   detectionRadius: 200,
   lostTargetRadius: 200 * 1.4,
   attackRadius: 32,
@@ -29,10 +29,8 @@ const MONSTER_STATS = {
 };
 
 const SPAWN_RATE_START = 0.3; // monsters/sec at t=0
-const SPAWN_RATE_END = 3.0; // monsters/sec at t=GAME_LENGTH_MS
-const MAX_ALIVE_MONSTERS = 60;
-
-export const ARROW_DAMAGE_TO_MONSTER = 20;
+const SPAWN_RATE_END = 1.5; // monsters/sec at t=GAME_LENGTH_MS
+const MAX_ALIVE_MONSTERS = 30;
 
 // ─── Per-room module state ──────────────────────────────────────────────────
 
@@ -64,11 +62,11 @@ function pickEdgeSpawn(){
     case 3: return {x: 800, y: 100};
     case 4: return {x: 1000, y: 100};
     // bottom side
-    case 5: return {x: 300, y: 500};
-    case 6: return {x: 400, y: 500};
-    case 7: return {x: 600, y: 500};
-    case 8: return {x: 800, y: 500};
-    case 9: return {x: 1000, y: 500};
+    case 5: return {x: 300, y: 600};
+    case 6: return {x: 400, y: 600};
+    case 7: return {x: 600, y: 600};
+    case 8: return {x: 800, y: 600};
+    case 9: return {x: 1000, y: 600};
     // left side
     case 10: return {x: 300, y: 300};
     case 11: return {x: 300, y: 500};
@@ -254,7 +252,7 @@ function tickMonsters(state: GameState, now: number, dtSec: number) {
 function damageMonster(
   state: GameState,
   monsterId: string,
-  amount = ARROW_DAMAGE_TO_MONSTER,
+  amount: number
 ): boolean {
   const m = state.monsters.find((x) => x.id === monsterId);
   if (!m) return false;

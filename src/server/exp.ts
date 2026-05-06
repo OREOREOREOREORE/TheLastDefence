@@ -4,7 +4,7 @@ const STARTING_EXP_TO_NEXT = 30;
 const EXP_GROWTH_RATE = 1.5;
 const EXP_PER_KILL = 10;
 
-const STARTING_PLAYER = {
+const STARTING_PLAYER_STAT = {
     level: 1,
     exp: 0,
     expToNext: STARTING_EXP_TO_NEXT,
@@ -14,22 +14,21 @@ const STARTING_PLAYER = {
 }
 
 const UPGRADES = [
-    (p: PlayerState) => {p.damage +=5;},
-    (p: PlayerState) => {p.speed +=5;},
-    (p: PlayerState) => {p.maxHealth +=20; p.health +=20;},
-    (_: PlayerState, base: BaseDefenseState) => {base.health +=30; base.maxHealth +=30;},
+    (p: PlayerState) => {p.damage +=5; return 'dmg';},
+    (p: PlayerState) => {p.speed +=5; return 'spd';},
+    (p: PlayerState) => {p.maxHealth +=20; p.health +=20; return 'hp';},
+    (_: PlayerState, base: BaseDefenseState) => {base.health +=30; base.maxHealth +=30; return 'base';},
 ]
 
 function awardKill (p: PlayerState, base: BaseDefenseState) {
     p.exp += EXP_PER_KILL;
-    while(p.exp >= p.expToNext){
+    if(p.exp >= p.expToNext){
         p.exp -= p.expToNext;
         p.level += 1;
         p.expToNext = Math.ceil(p.expToNext * EXP_GROWTH_RATE);
-
         const upgrade = UPGRADES[Math.floor(Math.random() * UPGRADES.length)];
-        upgrade(p, base);
+        console.log(`upgrade: ${upgrade(p, base)}`);
     }
 }
 
-export { STARTING_PLAYER, awardKill };
+export { STARTING_PLAYER_STAT, awardKill };
