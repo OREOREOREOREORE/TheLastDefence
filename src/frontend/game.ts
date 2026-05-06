@@ -128,11 +128,14 @@ export function initializeGame(roomId: string, player: PlayerId) {
   player1.setSequence('forward');
   player2.setSequence('forward');
 
-  player1.canvasX = 100;
-  player1.canvasY = 100;
+  baseSprite.canvasX = 700;
+  baseSprite.canvasY = 315;
 
-  player2.canvasX = 100;
-  player2.canvasY = 200;
+  player1.canvasX = 600;
+  player1.canvasY = 280;
+
+  player2.canvasX = 800;
+  player2.canvasY = 350;
 
   app.onTick(() => {
     for (const weapon of localWeaponsState.values()) {
@@ -315,7 +318,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
         continue;
       }
 
-      sounds.playSfx('shoot', 0.1);
+      sounds.playSfx('shoot', 0.05);
 
       const weaponSprite = new Sprite(WEAPON_SETTINGS);
       weaponSprite.setSequence('default');

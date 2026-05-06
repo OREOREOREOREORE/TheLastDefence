@@ -49,6 +49,8 @@ import type {
   PlayerId,
 } from '../common/game-state.ts';
 
+import type { GameRecord } from '../common/game-record.d.ts';
+
 import { damageMonster } from './monster.ts';
 import { STARTING_PLAYER, awardKill } from './exp.ts';
 
@@ -107,7 +109,14 @@ function computeAndAddEndGameResult(
   player1State: PlayerState,
   player2State: PlayerState,
   isFailed = false,
-) {
+): [
+  Record<string, Pick<GameRecord, 'hitRate' | 'remainingHealth'>>,
+  (number | bigint)[],
+] {
+  const state = getGameState(roomId);
+  if (!state) {
+    return [{}, []];
+  }
   const currentRoom = rooms.get(parseInt(roomId, 10));
 
   const player1Username = currentRoom?.players[0]?.username ?? 'Unknown';
@@ -203,8 +212,8 @@ websocketServer.on('connection', (socket) => {
 
       addNewGameState(roomId, {
         player1: {
-          x: 100,
-          y: 100,
+          x: 600,
+          y: 280,
           health: 100,
           numberOfWeaponsUsed: 0,
           numberOfHits: 0,
@@ -212,8 +221,8 @@ websocketServer.on('connection', (socket) => {
           ...STARTING_PLAYER,
         },
         player2: {
-          x: 100,
-          y: 200,
+          x: 800,
+          y: 350,
           health: 100,
           numberOfWeaponsUsed: 0,
           numberOfHits: 0,
@@ -242,15 +251,16 @@ websocketServer.on('connection', (socket) => {
             reason === 'gameOver',
           );
 
-          websocketServer
-            .to(roomId)
-            .emit(
-              'gameEnd',
-              reason,
-              endGameResult,
-              getGameRecords(),
-              newRecordIds,
-            );
+          websocketServer.to(roomId).emit(
+            'gameEnd',
+            reason,
+            {
+              ...endGameResult,
+              isBaseDestroyed: state.base.health === 0,
+            },
+            getGameRecords(),
+            newRecordIds,
+          );
           // One of the player leaving will automatically destroy the room
           leaveRoom(parseInt(roomId, 10), username);
         },
