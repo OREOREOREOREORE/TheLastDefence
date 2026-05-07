@@ -9,7 +9,7 @@ const STARTING_PLAYER_STAT = {
   exp: 0,
   expToNext: STARTING_EXP_TO_NEXT,
   damage: 10,
-  speed: 10,
+  speed: 5,
   maxHealth: 100,
 };
 

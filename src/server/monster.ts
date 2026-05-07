@@ -29,7 +29,7 @@ const MONSTER_STATS = {
 };
 
 const SPAWN_RATE_START = 0.3; // monsters/sec at t=0
-const SPAWN_RATE_END = 1.5; // monsters/sec at t=GAME_LENGTH_MS
+const SPAWN_RATE_END = 2.5; // monsters/sec at t=GAME_LENGTH_MS
 const MAX_ALIVE_MONSTERS = 30;
 
 // ─── Per-room module state ──────────────────────────────────────────────────
