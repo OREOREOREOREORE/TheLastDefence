@@ -17,21 +17,29 @@
       <p id="time-remaining-label" class="game-label">
         Time Remaining: <span id="time-remaining">04:00</span>
       </p>
-      <p id="health-label" class="game-label">Health: <span id="health">100 /100</span></p>
-      <p class="game-label">Base Health: <span id="base-health">200 /200</span></p>
-      <p id="partner-health-label" class="game-label">Partner's Health: <span id="partner-health">100 /100</span></p>
+      <p id="health-label" class="game-label">
+        Health: <span id="health">100 /100</span>
+      </p>
+      <p class="game-label">
+        Base Health: <span id="base-health">200 /200</span>
+      </p>
+      <p id="partner-health-label" class="game-label">
+        Partner's Health: <span id="partner-health">100 /100</span>
+      </p>
       <p id="cheat-mode" class="hidden game-label">Cheat mode activated</p>
       <div class="right-game-container">
         <p class="game-label">
-          Lv <span id="level">1</span>
-          · EXP <span id="exp">0</span>/<span id="exp-to-next">30</span>
+          Lv <span id="level">1</span> · EXP <span id="exp">0</span>/<span
+            id="exp-to-next"
+            >30</span
+          >
         </p>
         <div id="exp-bar">
           <div id="exp-bar-fill"></div>
         </div>
         <p class="game-label">
-          DMG <span id="stat-damage">10</span> ·
-          SPD <span id="stat-speed">10</span>
+          DMG <span id="stat-damage">10</span> · SPD
+          <span id="stat-speed">10</span>
         </p>
       </div>
     </div>
@@ -99,11 +107,160 @@
       </div>
       <div id="about-container" class="hidden flex-column">
         <h1>About & How to play</h1>
-        <p><b>Mission:</b> Collaborate with your partner to defend your base in the middle for 4 mins! The mission is successful if both players survive after 4 mins. You lose if both of you die or the base is destroyed before the time ends.</p>
-        <p>Monsters will spawn from the edges of the map and move towards you and your base, they will attack when they reach you or the base.</p>
-        <p><b>Controls:</b> Use WASD or arrow keys to move, and clicking for shooting egg puffs to that direction.</p>
-        <h2>Dark Mode</h2>
-        <p>Towards the last 10s of the game, the monsters will activate dark mode, in which your vision will be significantly reduced by a mask. Use the mouse to move around the mask to view different part of the map.</p>
+        <div id="about-content" class="flex flex-column">
+          <p>
+            The Last Defence is a mini cooperative game where you and your
+            partner work together to defend your base.
+          </p>
+          <p>
+            After you hit the Start button, you will be put into an existing
+            game room with another player, or a new room if there is no
+            available room.
+          </p>
+          <p>
+            Hit the Ready button when you're ready. The game will start when both of you are ready.
+          </p>
+          <p>
+            <span
+              style="
+                font-size: 1.17em;
+                font-weight: bold;
+                margin: 0;
+                padding: 0;
+              "
+            >
+              Mission</span
+            >: Collaborate with your partner to defend your
+            <span style="color: lightcoral; font-weight: bold"> BASE </span> in
+            the middle for
+            <span style="color: greenyellow; font-weight: bold"> 3 MINS! </span>
+          </p>
+          <p>
+            The mission is <b> successful </b> if both the
+            <span style="color: lightcoral; font-weight: bold"> BASE </span> and
+            any ONE player survive after 3 mins.
+          </p>
+          <p>
+            You <b> lose </b> otherwise. That is, both of you die
+            <b> OR </b> the
+            <span style="color: lightcoral; font-weight: bold"> BASE </span> is
+            destroyed <b>before</b> the time ends.
+          </p>
+          <p>
+            <span style="color: lightskyblue; font-weight: bold">Monsters</span>
+            will spawn from the edges of the map and move towards you and your
+            <span style="color: lightcoral; font-weight: bold"> BASE </span>
+          </p>
+          <p>
+            Be careful!
+            <span style="color: lightskyblue; font-weight: bold">Monsters</span>
+            will move to you instead if they see you.
+            <span style="color: lightskyblue; font-weight: bold">They</span>
+            will attack when they reach you or the
+            <span style="color: lightcoral; font-weight: bold"> BASE </span>.
+          </p>
+          <p>
+            Don't worry! You could kill the
+            <span style="color: lightskyblue; font-weight: bold">monsters</span>
+            by shooting 3
+            <span style="color: yellow; font-weight: bold">egg puffs</span> to
+            them!
+          </p>
+          <p>
+            Difficulty is increasing! The
+            <span style="color: lightskyblue; font-weight: bold">monsters</span>
+            will spam more and more. In the last 30s of the game, the
+            <span style="color: lightskyblue; font-weight: bold">monsters</span>
+            will activate
+            <span style="color: lightseagreen; font-weight: bold"
+              >Dark Mode</span
+            >.
+          </p>
+          <p>
+            Luckily, you can
+            <b>collect <span style="color: lightgreen">EXP</span></b> and
+            <b>level up</b> for every
+            <span style="color: lightskyblue; font-weight: bold">monster</span>
+            you kill. By level up, you gain some mystery ability, which may
+            increase your ability to kill the monsters, move faster or even a
+            larger max. health!
+          </p>
+
+          <h1>Game Control</h1>
+          <p>
+            <span
+              style="
+                font-size: 1.17em;
+                font-weight: bold;
+                margin: 0;
+                padding: 0;
+              "
+            >
+              Moving</span
+            >: Press <b>'WASD' or arrow keys</b> to move.
+          </p>
+          <p>
+            <span
+              style="
+                font-size: 1.17em;
+                font-weight: bold;
+                margin: 0;
+                padding: 0;
+              "
+            >
+              Attacking</span
+            >: Move the mouse! <b>Left click</b> for shooting
+            <span style="color: yellow; font-weight: bold">egg puffs</span> to
+            the <b>direction</b> of mouse.
+          </p>
+          <p>
+            <span
+              style="
+                font-size: 1.17em;
+                font-weight: bold;
+                margin: 0;
+                padding: 0;
+              "
+            >
+              Healing</span
+            >: Press <b>'f'</b> to heal your partner if they are NOT healthy!
+          </p>
+          <p>
+            <span
+              style="
+                font-size: 1.17em;
+                font-weight: bold;
+                margin: 0;
+                padding: 0;
+              "
+            >
+              Cheat Mode</span
+            >: Press <b>'shift' + 'C'</b> to activate the cheat mode. Then, you
+            and the
+            <span style="color: lightcoral; font-weight: bold"> BASE </span>
+            gain the secret power to become immortal and time will become 4
+            times faster so you don't need to defend your
+            <span style="color: lightcoral; font-weight: bold"> BASE </span>.
+            for 3 whole minutes.
+          </p>
+          <h1>Dark Mode</h1>
+          <p>
+            Beware of the Dark Mode! In the last 30s, your vision will be
+            significantly reduced by a mask. Use the mouse to move around the
+            mask to view different parts of the map.
+          </p>
+          <h1>Ranking System</h1>
+          <p>
+            After the game is finished, you will see a <b>leaderboard</b>. We
+            rank the players statistics by <b>hit rate</b>, then
+            <b>remaining health</b>.
+          </p>
+          <p>
+            So, don't spam
+            <span style="color: yellow; font-weight: bold">egg puffs</span> if
+            you want to stand on the leaderboard.
+          </p>
+        </div>
         <button id="about-back-to-start-menu" class="btn">
           Back to Start Menu
         </button>
