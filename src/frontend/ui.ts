@@ -105,6 +105,10 @@ export function initializeUI() {
         sounds.playSfx('game-over', 0.1);
       }
 
+      if (reason === 'finished') {
+        sounds.playSfx('victory', 0.1);
+      }
+
       setTimeout(() => {
         sounds.playBgm('game-room-bg', 0.05);
 

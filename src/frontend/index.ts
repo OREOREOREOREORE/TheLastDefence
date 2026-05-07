@@ -10,6 +10,7 @@ import deadSFX from '../../asset/sounds/dead.wav';
 import monsterDeadSFX from '../../asset/sounds/monster-dead.wav';
 import baseDestroyedSFX from '../../asset/sounds/base-destroyed.wav';
 import gameOverSFX from '../../asset/sounds/game-over.wav';
+import victorySFX from '../../asset/sounds/victory.mp3';
 
 await Promise.all([
   sounds.load('game-room-bg', gameRoomBGM),
@@ -20,6 +21,7 @@ await Promise.all([
   sounds.load('monster-dead', monsterDeadSFX),
   sounds.load('base-damaged', baseDestroyedSFX),
   sounds.load('game-over', gameOverSFX),
+  sounds.load('victory', victorySFX),
 ]);
 
 $(() => {
