@@ -70,14 +70,14 @@ const BASE_SETTINGS = {
   },
 };
 
-function formatTimeRemaining(milliseconds: number) {
+function formatTimeRemaining(milliseconds: number, isCheatMode = false) {
   const numberOfMinutes = Math.floor(milliseconds / (60 * 1000));
   const numberOfSeconds = Math.floor((milliseconds % (60 * 1000)) / 1000);
 
   const minutesString = numberOfMinutes.toString().padStart(2, '0');
   const secondsString = numberOfSeconds.toString().padStart(2, '0');
 
-  return `${minutesString}:${secondsString}`;
+  return `${minutesString}:${secondsString}${isCheatMode ? ' [4x]' : ''}`;
 }
 
 export function initializeGame(roomId: string, player: PlayerId) {
@@ -347,7 +347,12 @@ export function initializeGame(roomId: string, player: PlayerId) {
       localWeaponsState.delete(weaponId);
     }
 
-    timeRemainingElement.text(formatTimeRemaining(newState.timeRemaining));
+    timeRemainingElement.text(
+      formatTimeRemaining(
+        newState.timeRemaining,
+        newState.isCheatModeActivated,
+      ),
+    );
 
     const playerHealth =
       player === 1 ? newState.player1.health : newState.player2.health;
