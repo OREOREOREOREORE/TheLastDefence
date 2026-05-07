@@ -1,8 +1,8 @@
 import type { BaseDefenseState, PlayerState } from '../common/game-state.js';
 
 const STARTING_EXP_TO_NEXT = 30;
-const EXP_GROWTH_RATE = 1.5;
-const EXP_PER_KILL = 10;
+const EXP_GROWTH_RATE = 1.4;
+const EXP_PER_KILL = 15;
 
 const STARTING_PLAYER_STAT = {
   level: 1,
@@ -15,7 +15,7 @@ const STARTING_PLAYER_STAT = {
 
 const UPGRADES = [
   (p: PlayerState) => {
-    p.damage += 5;
+    p.damage += 10;
     return 'dmg';
   },
   (p: PlayerState) => {

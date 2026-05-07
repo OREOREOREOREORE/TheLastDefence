@@ -181,7 +181,7 @@ function maybeSpawnMonster(
   dtSec: number,
 ) {
   if (state.monsters.length >= MAX_ALIVE_MONSTERS) {
-    spawnAccumulator.set(roomId, 0);
+  spawnAccumulator.set(roomId, 0);
     return;
   }
 

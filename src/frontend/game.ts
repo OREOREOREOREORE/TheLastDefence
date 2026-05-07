@@ -270,7 +270,7 @@ export function initializeGame(roomId: string, player: PlayerId) {
       if (!inComingMonsterIds.has(id)) {
         app.removeObject(id);
         localMonsterSprites.delete(id);
-        sounds.playSfx('monster-dead', 0.2);
+        sounds.playSfx('monster-dead', 0.1);
       }
     }
 
@@ -355,20 +355,20 @@ export function initializeGame(roomId: string, player: PlayerId) {
     );
 
     const playerHealth =
-      player === 1 ? newState.player1.health : newState.player2.health;
+      player === 1 ? newState.player1 : newState.player2;
     const partnerHealth =
-      player === 1 ? newState.player2.health : newState.player1.health;
+      player === 1 ? newState.player2 : newState.player1;
 
     healthElement
       .text(
-        `${playerHealth} /${newState.player1.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${playerHealth.health} /${playerHealth.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
-      .css('color', playerHealth <= 20 ? 'crimson' : 'white');
+      .css('color', playerHealth.health <= 20 ? 'crimson' : 'white');
     partnerHealthElement
       .text(
-        `${partnerHealth} /${newState.player2.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
+        `${partnerHealth.health} /${partnerHealth.maxHealth}${newState.isCheatModeActivated ? ' [Immortal]' : ''}`,
       )
-      .css('color', partnerHealth <= 20 ? 'crimson' : 'white');
+      .css('color', partnerHealth.health <= 20 ? 'crimson' : 'white');
 
     if (newState.isCheatModeActivated) {
       cheatModeIndicatorElement.removeClass('hidden');
