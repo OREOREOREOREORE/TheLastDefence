@@ -134,7 +134,11 @@ export function startGameTimer(
       tickMonsters(gameState, now, dtsec);
       maybeSpawnMonster(gameState, roomId, dtsec);
 
-      gameState.timeRemaining -= TICK_MS;
+      gameState.timeRemaining = Math.max(
+        0,
+        gameState.timeRemaining -
+          TICK_MS * (gameState.isCheatModeActivated ? 4 : 1),
+      );
 
       if (gameState.timeRemaining < 1000 * 30) {
         gameState.isMaskActivated = true;
