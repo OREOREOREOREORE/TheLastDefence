@@ -102,11 +102,11 @@ export function initializeUI() {
       }
 
       if (reason === 'gameOver') {
-        sounds.playSfx('game-over', 0.1);
+        sounds.playSfx('game-over', 0.01);
       }
 
       if (reason === 'finished') {
-        sounds.playSfx('victory', 0.1);
+        sounds.playSfx('victory', 0.05);
       }
 
       setTimeout(() => {
