@@ -465,9 +465,6 @@ app.post('/register', async (req: LoginRequest, res) => {
   const { username, password } = req.body;
 
   // const users = JSON.parse(fs.readFileSync('data/users.json', 'utf-8')) as User;
-  // console.log(req.body);
-  // console.log(users);
-  // console.log(username, password)
 
   if (!username || !password) {
     res.json({ error: 'Username/password cannot be empty.' });

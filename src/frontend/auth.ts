@@ -14,7 +14,6 @@ export const Authentication = (function () {
     onError: (err: string) => void,
   ) => {
     const json = JSON.stringify({ username, password });
-    console.log(json);
 
     fetch('/login', {
       method: 'POST',
