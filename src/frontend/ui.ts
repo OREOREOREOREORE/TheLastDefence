@@ -190,9 +190,26 @@ export function initializeUI() {
 
   $('#reg-btn').on('click', (e) => {
     e.preventDefault();
-    const username = String($('#reg-username').val() ?? '').trim();
-    const password = String($('#reg-pwd').val() ?? '').trim();
-    const verifyPassword = String($('#ver-pwd').val() ?? '').trim();
+    const username = ($('#reg-username').val() as string | null)?.trim();
+
+    if (!username || username === '') {
+      messageElements.text('Username cannot be empty!');
+      return;
+    }
+
+    const password = ($('#reg-pwd').val() as string | null)?.trim();
+
+    if (!password) {
+      messageElements.text('Password cannot be empty!');
+      return;
+    }
+
+    const verifyPassword = ($('#ver-pwd').val() as string | null)?.trim();
+
+    if (!verifyPassword) {
+      messageElements.text('Please verify your password!');
+      return;
+    }
 
     if (password !== verifyPassword) {
       messageElements.text('Passwords do not match!');
