@@ -1,6 +1,5 @@
 import express from 'express';
 import ViteExpress from 'vite-express';
-// import fs from 'node:fs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser';
@@ -77,8 +76,6 @@ type LoginRequest = Request<
     password: string;
   }
 >;
-
-// type User = Record<string, { password: string }>;
 
 const app = express();
 const httpServer = createServer(app);
@@ -268,7 +265,6 @@ websocketServer.on('connection', (socket) => {
 
       websocketServer.to(roomId).emit('gameStart');
     }
-    // console.log('Current rooms:', room);
   });
 
   socket.on('leaveRoom', async (roomId: string, callback: () => void) => {
@@ -437,13 +433,12 @@ app.post('/login', async (req: LoginRequest, res) => {
     const token = jwt.sign({ name: username }, secretKey, { expiresIn: '1h' });
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: true, //true
+      secure: true,
       maxAge: 3600000,
     });
     return res.json({ success: true, user: { username } });
   }
   res.json({ error: 'incorrect password or username' });
-  // console.log(typeof users);
 });
 
 app.get('/validate', (req, res) => {

@@ -1,7 +1,6 @@
 import type { Player, Room } from './../common/game-room.d.ts';
 
 const rooms = new Map<number, Room>();
-// const waitingQueue: Room[] = []; // room with 1 player only
 const usernameToRoomId = new Map<string, number>();
 let currentRoomId = 0;
 
@@ -58,11 +57,6 @@ function setReady(roomId: number, username: string): Room | null {
   const room = rooms.get(roomId);
   if (!room) return null;
 
-  // if (room.player1?.username === username) {
-  //   room.player1.ready = true;
-  // } else if (room.player2?.username === username) {
-  //   room.player2.ready = true;
-  // }
   for (const player of room.players) {
     if (player.username === username) {
       player.ready = true;

@@ -53,43 +53,46 @@ function spawnRatePerSec(progress: number): number {
   return SPAWN_RATE_START + (SPAWN_RATE_END - SPAWN_RATE_START) * p * p;
 }
 
-function pickEdgeSpawn(){
-  switch (Math.floor(Math.random() * 16)){
+function pickEdgeSpawn() {
+  switch (Math.floor(Math.random() * 16)) {
     // top side
-    case 0: return {x: 300, y: 100};
-    case 1: return {x: 400, y: 100};
-    case 2: return {x: 600, y: 100};
-    case 3: return {x: 800, y: 100};
-    case 4: return {x: 1000, y: 100};
+    case 0:
+      return { x: 300, y: 100 };
+    case 1:
+      return { x: 400, y: 100 };
+    case 2:
+      return { x: 600, y: 100 };
+    case 3:
+      return { x: 800, y: 100 };
+    case 4:
+      return { x: 1000, y: 100 };
     // bottom side
-    case 5: return {x: 300, y: 600};
-    case 6: return {x: 400, y: 600};
-    case 7: return {x: 600, y: 600};
-    case 8: return {x: 800, y: 600};
-    case 9: return {x: 1000, y: 600};
+    case 5:
+      return { x: 300, y: 600 };
+    case 6:
+      return { x: 400, y: 600 };
+    case 7:
+      return { x: 600, y: 600 };
+    case 8:
+      return { x: 800, y: 600 };
+    case 9:
+      return { x: 1000, y: 600 };
     // left side
-    case 10: return {x: 300, y: 300};
-    case 11: return {x: 300, y: 500};
-    case 12: return {x: 300, y: 650};
+    case 10:
+      return { x: 300, y: 300 };
+    case 11:
+      return { x: 300, y: 500 };
+    case 12:
+      return { x: 300, y: 650 };
     //right side
-    case 13: return {x: 1000, y: 300};
-    case 14: return {x: 1000, y: 500};
-    default: return {x: 1000, y: 650};
+    case 13:
+      return { x: 1000, y: 300 };
+    case 14:
+      return { x: 1000, y: 500 };
+    default:
+      return { x: 1000, y: 650 };
   }
 }
-
-// function pickEdgeSpawn() {
-//   switch (Math.floor(Math.random() * 4)) {
-//     case 0:
-//       return { x: Math.random() * CANVAS_WIDTH, y: 0 }; // top
-//     case 1:
-//       return { x: CANVAS_WIDTH, y: Math.random() * CANVAS_HEIGHT }; // right
-//     case 2:
-//       return { x: Math.random() * CANVAS_WIDTH, y: CANVAS_HEIGHT }; // bottom
-//     default:
-//       return { x: 0, y: Math.random() * CANVAS_HEIGHT }; // left
-//   }
-// }
 
 function findNearestLivingPlayer(
   m: MonsterState,
@@ -175,13 +178,9 @@ function spawnMonster(
 }
 
 /** Accumulator-based spawner; rate scales over the round, framerate-independent. */
-function maybeSpawnMonster(
-  state: GameState,
-  roomId: string,
-  dtSec: number,
-) {
+function maybeSpawnMonster(state: GameState, roomId: string, dtSec: number) {
   if (state.monsters.length >= MAX_ALIVE_MONSTERS) {
-  spawnAccumulator.set(roomId, 0);
+    spawnAccumulator.set(roomId, 0);
     return;
   }
 
@@ -252,7 +251,7 @@ function tickMonsters(state: GameState, now: number, dtSec: number) {
 function damageMonster(
   state: GameState,
   monsterId: string,
-  amount: number
+  amount: number,
 ): boolean {
   const m = state.monsters.find((x) => x.id === monsterId);
   if (!m) return false;
@@ -260,4 +259,4 @@ function damageMonster(
   return m.health <= 0;
 }
 
-export {damageMonster, tickMonsters, maybeSpawnMonster, spawnMonster};
+export { damageMonster, tickMonsters, maybeSpawnMonster, spawnMonster };

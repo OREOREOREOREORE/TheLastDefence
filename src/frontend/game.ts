@@ -9,7 +9,7 @@ import $ from 'jquery';
 
 import player1SpriteSheet from '../../asset/player1-sprite-sheet.png';
 import player2SpriteSheet from '../../asset/player2-sprite-sheet.png';
-import weaponSpriteSheet from '../../asset/arrow.png';
+import weaponSpriteSheet from '../../asset/weapon.png';
 import backgroundImage from '../../asset/game-background.png';
 
 import monsterSpriteSheet from '../../asset/monster-sprite-sheet.png';
@@ -117,10 +117,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
   mask.hide();
   app.registerObject('mask', mask);
 
-  // const clip = new Circle(100, 100, 100);
-  // clip.setMode('clip');
-  // app.registerObject('clip', clip);
-
   app.registerObject('base', baseSprite);
   app.registerObject('player1', player1);
   app.registerObject('player2', player2);
@@ -201,19 +197,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
       }
     }
   });
-
-  // $(document).on('mousemove', (event) => {
-  //   const canvasRect = app.getCanvasRect();
-  //   if (!canvasRect) return;
-
-  //   const canvasX = event.clientX - canvasRect.left;
-  //   const canvasY = event.clientY - canvasRect.top;
-
-  //   arrow.rotation = Math.atan2(
-  //     canvasY - arrow.canvasY,
-  //     canvasX - arrow.canvasX,
-  //   );
-  // });
 
   socket.on('gameStateUpdate', (newState: GameState) => {
     // if (newState.base){
@@ -342,7 +325,6 @@ export function initializeGame(roomId: string, player: PlayerId) {
     }
 
     for (const weaponId of removedWeaponIds) {
-      console.log('Removing weapon with ID:', weaponId);
       app.removeObject(weaponId);
       localWeaponsState.delete(weaponId);
     }

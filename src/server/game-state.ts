@@ -1,7 +1,6 @@
 import type { GameState, PlayerId } from '../common/game-state.ts';
 import { maybeSpawnMonster, tickMonsters, resetMonsterRoom } from './monster.ts';
 
-// const DELTA = 10;
 const TICK_MS = 100;
 export type GameEndReason = 'finished' | 'gameOver';
 

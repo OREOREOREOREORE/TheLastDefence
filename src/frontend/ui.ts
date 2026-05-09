@@ -8,20 +8,6 @@ import type { Room } from '../common/game-room';
 import type { Player } from '../common/game-room';
 import type { GameRecord } from '../common/game-record';
 
-// type Screen = 'login' | 'start-menu' | 'game-room' | 'gaming';
-
-// export const ScreenState = {
-//   get(): Screen {
-//     return (sessionStorage.getItem('screen') as Screen | null) ?? 'login';
-//   },
-//   set(s: Screen): void {
-//     sessionStorage.setItem('screen', s);
-//   },
-//   clear(): void {
-//     sessionStorage.removeItem('screen');
-//   },
-// };
-
 let currentRoom: Room | null = null;
 
 //UI
@@ -194,8 +180,6 @@ export function initializeUI() {
         messageElements.text('');
         $('#login-form').addClass('hidden').removeClass('flex');
         $('#start-menu').removeClass('hidden').addClass('flex');
-        // ScreenState.set('start-menu');
-        // messageElement.text('play得!');
         connectSocket(username);
       },
       (err) => {
@@ -236,8 +220,6 @@ export function initializeUI() {
       () => {
         $('#start-menu').addClass('hidden').removeClass('flex');
         $('#login-form').removeClass('hidden').addClass('flex');
-        // $('#img-bg').attr('src', 'asset/background.png');
-        // ScreenState.set('login');
         socket.disconnect();
       },
       (err) => {
@@ -320,7 +302,6 @@ export function initializeUI() {
   Authentication.validate(
     () => {
       const user = Authentication.getUser();
-      // const screen = ScreenState.get();
       if (user) {
         connectSocket(user.username);
 
