@@ -1,8 +1,11 @@
 import { DatabaseSync } from 'node:sqlite';
+import { mkdirSync } from 'node:fs';
 
 import type { User } from '../common/auth.d.ts';
 
+mkdirSync('./data', { recursive: true });
 const db = new DatabaseSync('./data/game.db');
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
