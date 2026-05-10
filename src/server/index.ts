@@ -55,6 +55,7 @@ import { STARTING_PLAYER_STAT, awardKill } from './exp.ts';
 
 const TESTINGTIME = 60 * 2 * 1000;
 const GAME_DURATION = 60 * 1000 * 3; // 3 minutes
+const isDEV = process.env.NODE_ENV === 'development';
 
 interface Cookies {
   auth_token?: string;
@@ -86,9 +87,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 const secretKey = crypto.randomBytes(48).toString('hex');
-
 ViteExpress.config({
-  mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
+  mode: isDEV ? 'development' : 'production',
 });
 
 app.get('/message', (_, res) => res.send('Hello from express!'));
@@ -229,8 +229,7 @@ websocketServer.on('connection', (socket) => {
         base: { x: 700, y: 315, health: 300, maxHealth: 300 },
         monsters: [],
         weapons: [],
-        timeRemaining:
-          process.env.NODE_ENV === 'development' ? TESTINGTIME : GAME_DURATION,
+        timeRemaining: isDEV ? TESTINGTIME : GAME_DURATION,
         isCheatModeActivated: false,
         isMaskActivated: false,
       });
